@@ -10,7 +10,7 @@
 - 🛣️ React Router 路由管理
 - 🔐 完整的权限管理系统
 - 🗂️ Zustand 状态管理
-- 🌐 Axios HTTP 请求封装
+- 🌐 Alova HTTP 请求封装
 - 💅 Less 样式预处理器
 - 📏 ESLint + Prettier 代码规范
 - 🔧 完善的 TypeScript 配置
@@ -159,4 +159,4 @@ MIT License
 - 初始版本发布
 - 完整的移动端模版功能
 - 认证和权限管理
-- 开发工具链配置 
+- 开发工具链配置
