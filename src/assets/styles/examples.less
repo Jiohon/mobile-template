@@ -1,0 +1,42 @@
+/* 
+ * 静态资源使用示例
+ * 
+ * 在 Less/CSS 中使用路径别名的几种方式：
+ */
+
+// 1. 使用预定义的变量
+.background-example {
+  background-image: url("@{images-path}/bg.png");
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.header-example {
+  background-image: url("@{images-path}/header-bg.jpg");
+  padding: @spacing-lg;
+  border-radius: @border-radius-base;
+}
+
+// 2. 直接使用别名路径
+.logo-example {
+  background-image: url("@/assets/images/logo.png");
+  width: 120px;
+  height: 40px;
+  background-size: contain;
+}
+
+// 3. 使用变量和混合
+.card-example {
+  background: @primary-color;
+  padding: @spacing-md;
+  border-radius: @border-radius-base;
+  margin-bottom: @spacing-sm;
+
+  &.success {
+    background: @success-color;
+  }
+
+  &.warning {
+    background: @warning-color;
+  }
+}
