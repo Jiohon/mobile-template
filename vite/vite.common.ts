@@ -4,6 +4,8 @@ import { fileURLToPath } from "url"
 import react from "@vitejs/plugin-react"
 import { VitePWA } from "vite-plugin-pwa"
 
+import packageJson from "../package.json"
+
 import type { UserConfig } from "vite"
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -20,9 +22,9 @@ export const commonConfig: UserConfig = {
         globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
       },
       manifest: {
-        name: "Antd Mobile Template",
-        short_name: "AntdMobile",
-        description: "基于 antd-mobile 的移动端应用模版",
+        name: packageJson.name,
+        short_name: packageJson.name,
+        description: packageJson.description,
         theme_color: "#1677ff",
         background_color: "#ffffff",
         display: "standalone",

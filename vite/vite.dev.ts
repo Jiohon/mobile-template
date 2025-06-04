@@ -19,14 +19,14 @@ export const createDevConfig = (env: Record<string, string>): UserConfig => {
           target: proxyTarget,
           changeOrigin: true,
           rewrite: (path) => path.replace(new RegExp(proxyPathRewrite), ""),
-          configure: (proxy, options) => {
-            proxy.on("error", (err, req, res) => {
+          configure: (proxy) => {
+            proxy.on("error", (err) => {
               console.log("🚨 Proxy Error:", err.message)
             })
-            proxy.on("proxyReq", (proxyReq, req, res) => {
+            proxy.on("proxyReq", (proxyReq, req) => {
               console.log("📤 Proxy Request:", req.method, req.url, "→", proxyTarget)
             })
-            proxy.on("proxyRes", (proxyRes, req, res) => {
+            proxy.on("proxyRes", (proxyRes, req) => {
               console.log("📥 Proxy Response:", proxyRes.statusCode, req.url)
             })
           },

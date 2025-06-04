@@ -15,7 +15,8 @@
     "type-check": "tsc --noEmit",
     "code-check": "pnpm type-check && pnpm lint:check && pnpm format:check",
     "setup-env": "bash scripts/setup-env.sh",
-    "check-env": "tsx scripts/check-env.ts"
+    "check-env": "tsx scripts/check-env.ts",
+    "prepare": "husky"
   },
   "keywords": [
     "react",
@@ -57,12 +58,24 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.4",
+    "husky": "^9.1.7",
     "less": "^4.2.0",
+    "lint-staged": "^16.1.0",
     "prettier": "^3.1.0",
     "terser": "^5.40.0",
     "tsx": "^4.19.4",
     "typescript": "^5.2.2",
     "vite": "^5.0.0",
     "vite-plugin-pwa": "^0.17.4"
+  },
+  "lint-staged": {
+    "src/**/*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write",
+      "bash -c 'tsc --noEmit'"
+    ],
+    "src/**/*.{js,jsx,css,less,json}": [
+      "prettier --write"
+    ]
   }
 }

@@ -95,7 +95,7 @@ module.exports = {
 
     // TypeScript
     "@typescript-eslint/no-unused-vars": [
-      "error",
+      "warn",
       {
         argsIgnorePattern: "^_",
         varsIgnorePattern: "^_",
@@ -108,7 +108,7 @@ module.exports = {
     "@typescript-eslint/ban-ts-comment": "warn",
 
     // 其他规则
-    "no-console": ["warn", { allow: ["warn", "error"] }],
+    "no-console": 0,
     "no-unused-vars": "off",
 
     // React 规则

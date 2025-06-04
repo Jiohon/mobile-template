@@ -2,7 +2,7 @@
 import { defineConfig, loadEnv, mergeConfig } from "vite"
 
 // eslint-disable-next-line import/no-duplicates
-import { commonConfig, createDevConfig, prodConfig, stagingConfig } from "./vite"
+import { commonConfig, createDevConfig, createProdConfig, createStagingConfig } from "./vite"
 
 // https://vitejs.dev/config/
 export default defineConfig(({ command: _command, mode }) => {
@@ -16,10 +16,10 @@ export default defineConfig(({ command: _command, mode }) => {
         return mergeConfig(commonConfig, createDevConfig(env))
 
       case "staging":
-        return mergeConfig(commonConfig, stagingConfig)
+        return mergeConfig(commonConfig, createStagingConfig(env))
 
       case "production":
-        return mergeConfig(commonConfig, prodConfig)
+        return mergeConfig(commonConfig, createProdConfig(env))
 
       default:
         return mergeConfig(commonConfig, createDevConfig(env))

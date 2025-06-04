@@ -1,0 +1,23 @@
+#!/usr/bin/env sh
+
+# 运行TypeScript类型检查
+echo "🔍 正在进行TypeScript类型检查..."
+pnpm type-check
+
+# 如果类型检查失败，阻止提交
+if [ $? -ne 0 ]; then
+  echo "❌ TypeScript类型检查失败，请修复类型错误后再提交"
+  exit 1
+fi
+
+# 运行lint-staged检查暂存的文件
+echo "🧹 正在检查和格式化暂存的文件..."
+pnpm exec lint-staged
+
+# 如果lint-staged失败，阻止提交
+if [ $? -ne 0 ]; then
+  echo "❌ 代码检查或格式化失败，请修复后再提交"
+  exit 1
+fi
+
+echo "✅ 所有检查通过，允许提交"
