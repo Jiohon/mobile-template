@@ -1,20 +1,22 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useImperativeHandle, useMemo, useState } from "react"
 
 import { Button, Form } from "antd-mobile"
 import classnames from "classnames"
+import { cloneDeep } from "lodash"
 
-import { createRenderConfig, schemaRenderer } from "./core"
-import { LinkageEngine } from "./linkage"
-import { registerDefaultRenderers } from "./renderers"
-import { BaseColumnSchema, ColumnSchema, SchemaFormInstance, SchemaFormProps } from "./types"
-import { deepClone } from "./utils"
+import { createRenderConfig, createSchemaRenderer } from "./core"
+import { registerDefaultRenderers } from "./core/registerRenderers"
+import {
+  SchemaFormBaseColumnType,
+  SchemaFormDependencyColumnType,
+  SchemaFormErrorInfoType,
+  SchemaFormInstance,
+  SchemaFormProps,
+  SchemaFormValuesType,
+} from "./types"
 
-// 确保渲染器已注册
-registerDefaultRenderers()
-
-const SchemaForm: React.FC<SchemaFormProps> = ({
+const SchemaForm = <TValues extends SchemaFormValuesType = SchemaFormValuesType>({
   columns = [],
-  schema = [],
   initialValues = {},
   onValuesChange,
   onFinish,
@@ -34,150 +36,41 @@ const SchemaForm: React.FC<SchemaFormProps> = ({
   className,
   style,
   ...restProps
-}) => {
+}: SchemaFormProps<TValues>) => {
   // 使用 antd-mobile 的标准 Form.useForm
   const [internalForm] = Form.useForm()
-  const form = externalForm || internalForm
-  const [isValidating, setIsValidating] = useState(false)
-  const [formValues, setFormValues] = useState<Record<string, any>>({})
-  const [dependencyUpdateTrigger, setDependencyUpdateTrigger] = useState(0)
 
-  // 确定最终使用的列配置（向后兼容）
-  const finalColumns: ColumnSchema[] = useMemo(() => {
-    if (columns && columns.length > 0) {
-      return columns
-    }
-    if (schema && schema.length > 0) {
-      // 将旧的 schema 格式转换为新的 columns 格式
-      return schema.map((item: any) => ({
-        title: item.title || item.label || item.name,
-        dataIndex: item.dataIndex || item.name,
-        valueType: (item.valueType || item.type || item.componentType || "text") as any,
-        placeholder: item.placeholder,
-        required: item.required,
-        disabled: item.disabled,
-        condition: item.condition,
-        formItemProps: item.formItemProps,
-        fieldProps: item.fieldProps,
-        rules: item.rules,
-        linkage: item.linkage, // 新增联动配置
-        // dependency 字段支持
-        name: item.name,
-        columns: item.columns,
-      }))
-    }
-    return []
-  }, [columns, schema])
+  const [isValidating, setIsValidating] = useState(false)
+
+  // 安全地扩展 form 实例以支持泛型方法
+  const form = useMemo(() => {
+    return externalForm || internalForm
+  }, [externalForm, internalForm])
+
+  // 创建渲染器实例并注册默认渲染器
+  const schemaRenderer = useMemo(() => {
+    const renderer = createSchemaRenderer<TValues>()
+    registerDefaultRenderers(renderer)
+    return renderer
+  }, [])
 
   // 分离基础字段和依赖字段
   const baseColumns = useMemo(() => {
-    return finalColumns.filter((column) => column.valueType !== "dependency") as BaseColumnSchema[]
-  }, [finalColumns])
+    return columns.filter((column) => column.valueType !== "dependency")
+  }, [columns])
 
   const dependencyColumns = useMemo(() => {
-    return finalColumns.filter((column) => column.valueType === "dependency") as any[]
-  }, [finalColumns])
+    return columns.filter((column) => column.valueType === "dependency")
+  }, [columns])
 
-  // 计算依赖字段产生的动态字段
-  const computedDependencyFields = useMemo(() => {
-    const dynamicFields: BaseColumnSchema[] = []
-
-    dependencyColumns.forEach((depColumn) => {
-      if (depColumn.columns && typeof depColumn.columns === "function") {
-        try {
-          // 获取依赖字段的值
-          const dependencyValues: Record<string, any> = {}
-          if (depColumn.name && Array.isArray(depColumn.name)) {
-            depColumn.name.forEach((fieldName: string) => {
-              dependencyValues[fieldName] = formValues[fieldName]
-            })
-          }
-
-          // 调用 columns 函数生成动态字段
-          const generatedColumns = depColumn.columns(dependencyValues)
-          if (Array.isArray(generatedColumns)) {
-            dynamicFields.push(
-              ...(generatedColumns.filter(
-                (col) => col.valueType !== "dependency"
-              ) as BaseColumnSchema[])
-            )
-          }
-        } catch (error) {
-          console.error("计算依赖字段失败:", error)
-        }
-      }
-    })
-
-    return dynamicFields
-  }, [dependencyColumns, formValues, dependencyUpdateTrigger])
-
-  // 合并基础字段和动态字段
-  const allRenderColumns = useMemo(() => {
-    return [...baseColumns, ...computedDependencyFields]
-  }, [baseColumns, computedDependencyFields])
-
-  // 创建联动引擎 - 使用所有字段
-  const linkageEngine = useMemo(() => {
-    return new LinkageEngine(allRenderColumns)
-  }, [allRenderColumns])
-
-  // 暴露表单实例给父组件
   useEffect(() => {
-    // 延迟设置 formRef，确保 Form 组件已经挂载
-    const timer = setTimeout(() => {
-      if (formRef && form) {
-        const formInstance: SchemaFormInstance = {
-          getFieldsValue: () => form?.getFieldsValue() || {},
-          setFieldsValue: (values: Record<string, any>) => {
-            if (form) {
-              form.setFieldsValue(values)
-              // 手动更新 formValues 状态以触发 dependency 字段更新
-              setFormValues((prev) => ({ ...prev, ...values }))
-              // 触发 dependency 重新计算
-              setDependencyUpdateTrigger((prev) => prev + 1)
-            }
-          },
-          validateFields: () => form?.validateFields() || Promise.resolve({}),
-          resetFields: () => {
-            if (form) {
-              form.resetFields()
-              setFormValues({})
-              setDependencyUpdateTrigger((prev) => prev + 1)
-            }
-          },
-          submit: () => form?.submit(),
-          getFieldValue: (name: string) => form?.getFieldValue(name),
-          setFieldValue: (name: string, value: any) => {
-            if (form) {
-              form.setFieldValue(name, value)
-              // 手动更新单个字段的状态
-              setFormValues((prev) => ({ ...prev, [name]: value }))
-              setDependencyUpdateTrigger((prev) => prev + 1)
-            }
-          },
-          // 新增联动相关方法
-          linkageEngine,
-          clearLinkageCache: () => linkageEngine.clearCache(),
-          triggerDependencyUpdate: () => {
-            const currentValues = form?.getFieldsValue() || {}
-            setFormValues(currentValues)
-            setDependencyUpdateTrigger((prev) => prev + 1)
-          },
-        }
+    form.setFieldsValue(initialValues)
+  }, [form, initialValues])
 
-        if (typeof formRef === "function") {
-          ;(formRef as any)(formInstance)
-        } else if (formRef && typeof formRef === "object" && "current" in formRef) {
-          const ref = formRef as React.MutableRefObject<SchemaFormInstance>
-          ref.current = formInstance
-        }
-      }
-    }, 0) // 使用 setTimeout 0 来延迟到下一个事件循环
-
-    return () => {
-      clearTimeout(timer)
-    }
-  }, [form, formRef, linkageEngine])
+  // 使用 useImperativeHandle 暴露表单实例方法到 formRef
+  useImperativeHandle(formRef, (): SchemaFormInstance => {
+    return { ...form }
+  }, [form])
 
   // 表单提交处理
   const handleSubmit = () => {
@@ -185,179 +78,86 @@ const SchemaForm: React.FC<SchemaFormProps> = ({
 
     form
       .validateFields()
-      .then((values: Record<string, any>) => {
+      .then((values: TValues) => {
         setIsValidating(false)
-        onFinish?.(deepClone(values))
+        onFinish?.(cloneDeep(values))
       })
-      .catch((errorInfo: any) => {
+      .catch((errorInfo: SchemaFormErrorInfoType<TValues>) => {
         setIsValidating(false)
         onFinishFailed?.(errorInfo)
+      })
+      .finally(() => {
+        setIsValidating(false)
       })
   }
 
   // 处理表单值变化
   const handleValuesChange = useCallback(
-    async (changedValues: Record<string, any>, allValues: Record<string, any>) => {
-      // 更新表单值状态，用于 dependency 字段计算
-      setFormValues(allValues)
-
-      // 执行联动效果
-      const changedFields = Object.keys(changedValues)
-      for (const fieldName of changedFields) {
-        await linkageEngine.executeEffects(fieldName, allValues, form)
-      }
-
+    async (changedValues: Partial<TValues>, allValues: TValues) => {
       onValuesChange?.(changedValues, allValues)
     },
-    [onValuesChange, linkageEngine, form]
+    [onValuesChange]
   )
 
-  // 初始化表单值
-  useEffect(() => {
-    if (initialValues) {
-      setFormValues(initialValues)
-    }
-  }, [initialValues])
-
-  // 计算字段的依赖关系
-  const computeFieldDependencies = (column: BaseColumnSchema) => {
-    const dependencies = linkageEngine.getDependencies(column.dataIndex)
-    const isDynamicField = computedDependencyFields.some(
-      (field) => field.dataIndex === column.dataIndex
-    )
-
-    // 只对动态字段添加dependency字段的依赖
-    const dependencyFieldNames = isDynamicField
-      ? dependencyColumns.reduce((deps: string[], depCol) => {
-          if (depCol.name && Array.isArray(depCol.name)) {
-            deps.push(...depCol.name)
-          }
-          return deps
-        }, [])
-      : []
-
-    const allDependencies = [
-      ...dependencies,
-      ...(column.condition ? [column.condition.field] : []),
-      ...(column.linkage?.dependencies || []),
-      ...dependencyFieldNames,
-    ].filter(Boolean)
-
-    return { dependencies, isDynamicField, dependencyFieldNames, allDependencies }
-  }
-
-  // 处理动态属性
-  const computeFieldProps = (column: BaseColumnSchema, currentValues: Record<string, any>) => {
-    const baseFormItemProps =
-      typeof column.formItemProps === "function"
-        ? column.formItemProps(currentValues)
-        : column.formItemProps || {}
-
-    const baseFieldProps =
-      typeof column.fieldProps === "function"
-        ? column.fieldProps(currentValues)
-        : column.fieldProps || {}
-
-    const linkageProps = linkageEngine.computeProps(column, currentValues)
-
-    return {
-      finalFormItemProps: { ...baseFormItemProps, ...linkageProps },
-      finalFieldProps: { ...baseFieldProps },
-      linkageProps,
-    }
-  }
-
-  // 计算验证规则
-  const computeValidationRules = (
-    column: BaseColumnSchema,
-    currentValues: Record<string, any>,
-    formItemProps: any
-  ) => {
-    const baseRules = formItemProps.rules || column.rules || []
-    const linkageRules = linkageEngine.computeRules(column, currentValues)
-    const allRules = [...baseRules, ...linkageRules]
-
-    return allRules
-      .map((rule: any) => ({
-        required: rule.required,
-        message: rule.message,
-        pattern: typeof rule.pattern === "string" ? new RegExp(rule.pattern) : rule.pattern,
-        min: rule.min,
-        max: rule.max,
-        validator: rule.validator,
-        len: rule.len,
-        type: rule.type,
-        whitespace: rule.whitespace,
-      }))
-      .filter((rule: any) => Object.keys(rule).some((key) => rule[key] !== undefined))
-  }
-
-  // 渲染字段组件
-  const renderFieldElement = (
-    column: BaseColumnSchema,
-    currentValues: Record<string, any>,
-    fieldProps: any
-  ) => {
-    const renderConfig = createRenderConfig(column, form)
-    if (!renderConfig) return null
-
-    return schemaRenderer.render({
-      schema: renderConfig,
-      value: currentValues[column.dataIndex],
-      onChange: (value: any) => {
-        const computedValue = linkageEngine.computeValue(column, currentValues, value)
-        form.setFieldValue(column.dataIndex, computedValue)
-      },
-      form,
-      disabled: disabled || column.disabled || fieldProps.disabled,
-      ...fieldProps,
-    })
-  }
-
-  // 渲染单个表单字段的函数（简化版）
-  function renderFormField(
-    column: BaseColumnSchema,
-    currentValues: Record<string, any>,
-    key: string
-  ) {
+  // 渲染单个表单字段
+  const renderFormColumn = (column: SchemaFormBaseColumnType<TValues>, key: string) => {
     try {
-      // 计算属性
-      const { finalFormItemProps, finalFieldProps, linkageProps } = computeFieldProps(
-        column,
-        currentValues
-      )
+      // 创建渲染配置
+      const renderConfig = createRenderConfig<TValues>(column, initialValues, form)
+      if (!renderConfig) return null
 
       // 渲染字段元素
-      const fieldElement = renderFieldElement(column, currentValues, finalFieldProps)
-      if (!fieldElement) {
+      const columnElement = schemaRenderer.render(renderConfig)
+      if (!columnElement) {
         return null
       }
 
-      // 计算验证规则
-      const validationRules = computeValidationRules(column, currentValues, finalFormItemProps)
+      // 从 column 中提取 Form.Item 属性，排除自定义的属性
+      const { name, ...formItemProps } = column
 
       return (
-        <Form.Item
-          key={key}
-          name={column.dataIndex}
-          label={linkageProps.title || column.title}
-          required={
-            linkageProps.required !== undefined
-              ? linkageProps.required
-              : column.required || finalFormItemProps.required
-          }
-          rules={validationRules}
-          help={linkageProps.help || column.tooltip || finalFormItemProps.help}
-          extra={finalFormItemProps.extra}
-          {...finalFormItemProps}
-        >
-          {fieldElement}
+        <Form.Item key={key} name={name} {...formItemProps}>
+          {columnElement}
         </Form.Item>
       )
     } catch (error) {
-      console.error(`❌ 渲染字段 ${column.dataIndex} 时出错:`, error)
+      console.error(`❌ 渲染字段 ${String(column.name)} 时出错:`, error)
       return null
     }
+  }
+
+  // 渲染依赖字段组件
+  const renderDependencyColumn = (
+    depColumn: SchemaFormDependencyColumnType<TValues>,
+    index: number
+  ) => {
+    return (
+      <Form.Subscribe
+        key={`dependency-${index}`}
+        to={depColumn.to.map((columnName) => columnName as string)}
+      >
+        {(changedValues, _formInstance) => {
+          try {
+            // 调用 children 函数生成动态字段
+            const dependencyColumns = depColumn.children(changedValues as Partial<TValues>, form)
+
+            // 渲染动态字段
+            return dependencyColumns.map((column, columnIndex) => {
+              if (column.valueType === "dependency") {
+                // 嵌套的依赖字段
+                return renderDependencyColumn(column, columnIndex)
+              } else {
+                const key = `dependency-${index}-${columnIndex}-${String(column.name)}`
+                return renderFormColumn(column, key)
+              }
+            })
+          } catch (error) {
+            console.error(`❌ 渲染依赖字段时出错:`, error)
+            return null
+          }
+        }}
+      </Form.Subscribe>
+    )
   }
 
   return (
@@ -378,47 +178,14 @@ const SchemaForm: React.FC<SchemaFormProps> = ({
         style={style}
         {...restProps}
       >
-        {allRenderColumns.map((column, index) => {
-          // 获取字段依赖
-          const { isDynamicField, allDependencies } = computeFieldDependencies(column)
-
-          // 生成唯一的 key
-          const key = column.dataIndex ? String(column.dataIndex) : `column-${index}`
-
-          if (isDynamicField) {
-            // 依赖字段使用 shouldUpdate 模式
-            return (
-              <Form.Item
-                key={key}
-                noStyle
-                shouldUpdate={(prevValues, currentValues) => {
-                  return allDependencies.some((dep) => {
-                    const prevValue = prevValues[dep]
-                    const currentValue = currentValues[dep]
-                    return prevValue !== currentValue
-                  })
-                }}
-              >
-                {({ getFieldsValue }) => {
-                  const currentValues = getFieldsValue()
-
-                  return renderFormField(column, currentValues, key)
-                }}
-              </Form.Item>
-            )
-          } else {
-            // 普通字段使用空依赖数组，确保可以使用 render props
-            return (
-              <Form.Item key={key} noStyle dependencies={[]}>
-                {({ getFieldsValue }) => {
-                  const currentValues = getFieldsValue()
-
-                  return renderFormField(column, currentValues, key)
-                }}
-              </Form.Item>
-            )
-          }
+        {/* 渲染基础字段 */}
+        {baseColumns.map((column, index) => {
+          const key = column.name ? String(column.name) : `column-${index}`
+          return renderFormColumn(column, key)
         })}
+
+        {/* 渲染依赖字段 */}
+        {dependencyColumns.map((depColumn, index) => renderDependencyColumn(depColumn, index))}
 
         {showSubmitButton && (
           <Form.Item>

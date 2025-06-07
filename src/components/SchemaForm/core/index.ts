@@ -1,83 +1,170 @@
 import React from "react"
 
-import { BaseColumnSchema, ColumnSchema } from "../types"
-import { getFieldOptions, parseDynamicProps } from "../utils"
+import { omit } from "lodash"
 
-// 字段渲染器映射
-export interface FieldRenderProps {
-  schema: BaseColumnSchema
-  value: any
-  onChange: (value: any) => void
-  form: any
-  disabled?: boolean
-}
+import {
+  ExtractColumnPropsType,
+  SchemaFormAllColumnRendererPropsType,
+  SchemaFormBaseColumnType,
+  SchemaFormColumnValueType,
+  SchemaFormInstance,
+  SchemaFormValuesType,
+} from "../types"
 
-export type FieldRenderer = (props: FieldRenderProps) => React.ReactNode
+/**
+ * 字段渲染器函数类型
+ * @template TValues - 表单数据类型
+ */
+export type SchemaFormColumnRendererFunction<TValues extends SchemaFormValuesType> = (
+  props: SchemaFormBaseColumnType<TValues> & {
+    formItemProps: Omit<SchemaFormBaseColumnType<TValues>, "fieldProps">
+  }
+) => React.ReactNode
 
-// 核心字段渲染器
-export class SchemaRenderer {
-  private renderers: Map<string, FieldRenderer> = new Map()
+/**
+ * 核心字段渲染器类
+ * @template TValues - 表单数据类型，继承自 SchemaFormValuesType
+ */
+export class SchemaRenderer<TValues extends SchemaFormValuesType = SchemaFormValuesType> {
+  private renderers: Map<
+    SchemaFormColumnValueType,
+    React.ComponentType<SchemaFormAllColumnRendererPropsType<TValues>>
+  > = new Map()
 
-  constructor() {
-    this.registerDefaultRenderers()
+  /**
+   * 注册字段渲染器
+   * @template TColumnType - 字段值类型
+   * @param valueType - 字段类型标识
+   * @param renderer - 对应的渲染组件
+   */
+  register<TColumnType extends SchemaFormColumnValueType>(
+    valueType: TColumnType,
+    renderer: React.ComponentType<ExtractColumnPropsType<TColumnType, TValues>>
+  ): void {
+    this.renderers.set(
+      valueType,
+      renderer as React.ComponentType<SchemaFormAllColumnRendererPropsType<TValues>>
+    )
   }
 
-  // 注册字段渲染器
-  register(valueType: string, renderer: FieldRenderer) {
-    this.renderers.set(valueType, renderer)
+  /**
+   * 批量注册渲染器
+   * @param rendererMap - 渲染器映射表
+   */
+  registerBatch(
+    rendererMap: Partial<
+      Record<
+        SchemaFormColumnValueType,
+        React.ComponentType<SchemaFormAllColumnRendererPropsType<TValues>>
+      >
+    >
+  ): void {
+    Object.entries(rendererMap).forEach(([valueType, renderer]) => {
+      if (renderer) {
+        this.renderers.set(valueType as SchemaFormColumnValueType, renderer)
+      }
+    })
   }
 
-  // 获取字段渲染器
-  getRenderer(valueType: string): FieldRenderer | undefined {
+  /**
+   * 获取字段渲染器
+   * @param valueType - 字段类型标识
+   * @returns 对应的渲染组件或默认文本渲染器
+   */
+  getRenderer(
+    valueType: SchemaFormColumnValueType
+  ): React.ComponentType<SchemaFormAllColumnRendererPropsType<TValues>> | undefined {
     return this.renderers.get(valueType) || this.renderers.get("text")
   }
 
-  // 渲染字段
-  render(props: FieldRenderProps): any {
-    const { schema } = props
-    const valueType = (schema as any).valueType || "text"
-    const renderer = this.getRenderer(valueType)
+  /**
+   * 检查渲染器是否已注册
+   * @param valueType - 字段类型标识
+   * @returns 是否已注册
+   */
+  hasRenderer(valueType: SchemaFormColumnValueType): boolean {
+    return this.renderers.has(valueType)
+  }
 
-    if (!renderer) {
+  /**
+   * 获取所有已注册的渲染器类型
+   * @returns 已注册的字段类型数组
+   */
+  getRegisteredTypes(): SchemaFormColumnValueType[] {
+    return Array.from(this.renderers.keys())
+  }
+
+  /**
+   * 渲染字段
+   * @param props - 字段渲染属性
+   * @returns 渲染后的 React 节点
+   */
+  render(props: SchemaFormAllColumnRendererPropsType<TValues>): React.ReactNode {
+    const valueType = props.formItemProps.valueType || "text"
+    const Renderer = this.getRenderer(valueType)
+
+    if (!Renderer) {
       console.warn(`❌ No renderer found for valueType: ${valueType}`)
       return null
     }
 
     try {
-      return renderer(props)
+      return React.createElement(Renderer, props)
     } catch (error) {
       console.error(`❌ 渲染器 ${valueType} 执行出错:`, error)
       return null
     }
   }
 
-  private registerDefaultRenderers() {
-    // 默认渲染器会在需要时注册
+  /**
+   * 清除所有注册的渲染器
+   */
+  clear(): void {
+    this.renderers.clear()
+  }
+
+  /**
+   * 移除特定类型的渲染器
+   * @param valueType - 要移除的字段类型
+   */
+  unregister(valueType: SchemaFormColumnValueType): boolean {
+    return this.renderers.delete(valueType)
   }
 }
 
-// 单例渲染器实例
-export const schemaRenderer = new SchemaRenderer()
+/**
+ * 创建渲染器实例的工厂函数
+ * @template TValues - 表单数据类型
+ * @returns 新的渲染器实例
+ */
+export const createSchemaRenderer = <
+  TValues extends SchemaFormValuesType = SchemaFormValuesType,
+>(): SchemaRenderer<TValues> => {
+  return new SchemaRenderer<TValues>()
+}
 
-// 渲染配置工厂函数
-export const createRenderConfig = (column: ColumnSchema, form: any) => {
-  if (column.valueType === "dependency") {
-    return null
-  }
+/**
+ * 渲染配置工厂函数
+ * @template TValues - 表单数据类型
+ * @param column - 字段配置
+ * @param initialValues - 初始值
+ * @param form - 表单实例
+ * @returns 渲染配置对象
+ */
+export const createRenderConfig = <TValues extends SchemaFormValuesType>(
+  column: SchemaFormBaseColumnType<TValues>,
+  initialValues: Partial<TValues>,
+  form: SchemaFormInstance
+): SchemaFormAllColumnRendererPropsType<TValues> => {
+  const formItemProps = omit(column, ["fieldProps"])
 
-  const baseColumn = column as BaseColumnSchema
+  // 优先从表单实例获取当前值，如果不存在则使用初始值
+  const currentValue = form.getFieldValue(column.name) ?? initialValues[column.name]
 
-  // 解析动态属性
-  const fieldProps = parseDynamicProps(baseColumn.fieldProps, form)
-  const formItemProps = parseDynamicProps(baseColumn.formItemProps, form)
-
-  // 获取选项数据
-  const options = getFieldOptions(baseColumn)
-
+  // 不需要手动传递 value，Form.Item 会自动管理字段值
   return {
-    ...baseColumn,
-    fieldProps,
+    ...column.fieldProps,
+    value: currentValue,
     formItemProps,
-    options,
   }
 }

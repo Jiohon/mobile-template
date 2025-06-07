@@ -17,12 +17,6 @@ export interface PageResponse<T = any> extends ApiResponse<T> {
   pageInfo: PageInfo
 }
 
-export interface SelectOption {
-  label: string
-  value: string | number
-  disabled?: boolean
-}
-
 export interface RouteConfig {
   path: string
   element: ComponentType

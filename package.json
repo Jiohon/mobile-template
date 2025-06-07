@@ -35,6 +35,8 @@
     "classnames": "^2.5.1",
     "dayjs": "^1.11.10",
     "i18next": "^23.7.6",
+    "lodash": "^4.17.21",
+    "rc-field-form": "^2.7.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-i18next": "^13.5.0",
@@ -44,6 +46,7 @@
   },
   "devDependencies": {
     "@types/classnames": "^2.3.4",
+    "@types/lodash": "^4.17.17",
     "@types/node": "^22.15.29",
     "@types/react": "^18.2.37",
     "@types/react-dom": "^18.2.15",
