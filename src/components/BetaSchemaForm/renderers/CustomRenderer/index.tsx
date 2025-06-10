@@ -1,6 +1,6 @@
 import React from "react"
 
-import { SchemaFormExpandRendererPropsType, SchemaFormValuesType } from "../../types"
+import { ExpandRendererPropsType, SchemaFormValuesType } from "../../types"
 
 import "./index.less"
 
@@ -8,7 +8,7 @@ import "./index.less"
  * CustomRenderer组件的Props类型
  */
 export interface CustomRendererProps<T extends SchemaFormValuesType>
-  extends SchemaFormExpandRendererPropsType<"custom", any, T> {
+  extends ExpandRendererPropsType<"custom", any, T> {
   render?: (props: any) => React.ReactNode
   component?: React.ComponentType<any>
 }

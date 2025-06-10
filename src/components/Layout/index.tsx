@@ -73,7 +73,7 @@ const Layout: React.FC = () => {
         <Outlet />
       </div>
       <div className={styles.tabBar}>
-        <TabBar activeKey={pathname} onChange={setRouteActive}>
+        <TabBar activeKey={pathname} onChange={setRouteActive} safeArea>
           {tabs.map((item) => (
             <TabBar.Item key={item.key} icon={item.icon} title={item.title} />
           ))}

@@ -1,6 +1,6 @@
 import { Rate } from "antd-mobile"
 
-import { SchemaFormExpandRendererPropsType, SchemaFormValuesType } from "../../types"
+import { ExpandRendererPropsType, SchemaFormValuesType } from "../../types"
 
 import type { RateProps } from "antd-mobile"
 import "./index.less"
@@ -9,7 +9,7 @@ import "./index.less"
  * RateRenderer组件的Props类型
  */
 export interface RateRendererProps<T extends SchemaFormValuesType>
-  extends SchemaFormExpandRendererPropsType<"rate", RateProps, T> {
+  extends ExpandRendererPropsType<"rate", RateProps, T> {
   disabled?: boolean
 }
 

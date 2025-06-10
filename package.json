@@ -33,7 +33,7 @@
     "antd-mobile": "^5.36.1",
     "antd-mobile-icons": "^0.3.0",
     "classnames": "^2.5.1",
-    "dayjs": "^1.11.10",
+    "dayjs": "^1.11.13",
     "i18next": "^23.7.6",
     "lodash": "^4.17.21",
     "rc-field-form": "^2.7.0",

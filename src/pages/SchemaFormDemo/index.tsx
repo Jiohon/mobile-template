@@ -2,13 +2,13 @@ import React, { useRef } from "react"
 
 import { Button, Card, Toast } from "antd-mobile"
 
-import { SchemaForm } from "@/components/SchemaForm"
+import BetaSchemaForm from "@/components/BetaSchemaForm"
 import {
   SchemaFormColumnType,
   SchemaFormInstance,
   SchemaFormOptionType,
   SchemaFormValuesType,
-} from "@/components/SchemaForm/types"
+} from "@/components/BetaSchemaForm/types"
 
 // 定义表单数据类型
 interface DemoFormValues extends SchemaFormValuesType {
@@ -23,14 +23,13 @@ interface DemoFormValues extends SchemaFormValuesType {
   dependencyColumn?: string
 }
 
-// SchemaFormItemBase<"text", TextRendererProps<DemoFormValues>, DemoFormValues>.fieldProps?: TextRendererProps<DemoFormValues> | undefined
-
 // 完整功能测试配置
 const fullFeatureColumns: SchemaFormColumnType<DemoFormValues>[] = [
   {
     label: "姓名",
     name: "name",
-    valueType: "text",
+    initialValue: "name11",
+    componentType: "text",
     required: true,
     rules: [
       {
@@ -38,14 +37,17 @@ const fullFeatureColumns: SchemaFormColumnType<DemoFormValues>[] = [
         message: "请输入姓名",
       },
     ],
-    fieldProps: {
+    componentProps: {
       placeholder: "请输入姓名",
+      onChange: (value) => {
+        console.log("兴趣爱好", value)
+      },
     },
   },
   {
     label: "年龄",
     name: "age",
-    valueType: "number",
+    componentType: "number",
     required: true,
     rules: [
       {
@@ -53,7 +55,7 @@ const fullFeatureColumns: SchemaFormColumnType<DemoFormValues>[] = [
         message: "请输入年龄",
       },
     ],
-    fieldProps: {
+    componentProps: {
       placeholder: "请输入年龄",
       min: 18,
       max: 100,
@@ -62,7 +64,7 @@ const fullFeatureColumns: SchemaFormColumnType<DemoFormValues>[] = [
   {
     label: "性别",
     name: "gender",
-    valueType: "select",
+    componentType: "select",
     required: true,
     rules: [
       {
@@ -70,7 +72,7 @@ const fullFeatureColumns: SchemaFormColumnType<DemoFormValues>[] = [
         message: "请选择性别",
       },
     ],
-    fieldProps: {
+    componentProps: {
       options: [
         { label: "男", value: "male" },
         { label: "女", value: "female" },
@@ -80,17 +82,33 @@ const fullFeatureColumns: SchemaFormColumnType<DemoFormValues>[] = [
   {
     label: "VIP用户",
     name: "isVip",
-    valueType: "switch",
-    fieldProps: {
+    componentType: "switch",
+    componentProps: {
       checkedText: "是",
       uncheckedText: "否",
     },
   },
   {
+    label: "radio",
+    name: "radio",
+    componentType: "radio",
+    componentProps: {
+      options: [
+        { label: "音乐", value: "music" },
+        { label: "体育", value: "sports" },
+        { label: "阅读", value: "reading" },
+        { label: "旅游", value: "travel" },
+      ],
+    },
+  },
+  {
     label: "兴趣爱好",
     name: "hobbies",
-    valueType: "checkbox",
-    fieldProps: {
+    componentType: "checkbox",
+    componentProps: {
+      onChange: (value) => {
+        console.log("兴趣爱好", value)
+      },
       options: [
         { label: "音乐", value: "music" },
         { label: "体育", value: "sports" },
@@ -102,7 +120,7 @@ const fullFeatureColumns: SchemaFormColumnType<DemoFormValues>[] = [
   {
     label: "城市",
     name: "city",
-    valueType: "select",
+    componentType: "select",
     required: true,
     rules: [
       {
@@ -110,7 +128,7 @@ const fullFeatureColumns: SchemaFormColumnType<DemoFormValues>[] = [
         message: "请选择城市",
       },
     ],
-    fieldProps: {
+    componentProps: {
       options: [
         { label: "北京", value: "beijing" },
         { label: "上海", value: "shanghai" },
@@ -119,12 +137,48 @@ const fullFeatureColumns: SchemaFormColumnType<DemoFormValues>[] = [
       ],
     },
   },
+  {
+    label: "date",
+    name: "date",
+    componentType: "date",
+    componentProps: {},
+  },
+  {
+    label: "picker",
+    name: "picker",
+    componentType: "picker",
+    componentProps: {
+      columns: [
+        [
+          { label: "周一", value: "Mon" },
+          { label: "周二", value: "Tues" },
+          { label: "周三", value: "Wed" },
+          { label: "周四", value: "Thur" },
+          { label: "周五", value: "Fri" },
+        ],
+      ],
+    },
+  },
+  {
+    label: "upload",
+    name: "upload",
+    componentType: "upload",
+    componentProps: {
+      maxCount: 3,
+      upload: (file) => {
+        console.log("upload", file)
+        return Promise.resolve({
+          url: "https://picsum.photos/200/300",
+        })
+      },
+    },
+  },
 
   // dependency 字段 - 根据城市动态生成区县选择
   {
-    valueType: "dependency",
+    componentType: "dependency",
     to: ["city"],
-    children: (changedValues, _form) => {
+    children(changedValues, _form) {
       const { city } = changedValues
 
       console.log("dependency city 变化:", city)
@@ -136,13 +190,10 @@ const fullFeatureColumns: SchemaFormColumnType<DemoFormValues>[] = [
             {
               label: "区县",
               name: "district",
-              valueType: "select",
-              required: true,
+              componentType: "select",
               rules: [{ required: true, message: "请选择区县" }],
-              a: 1,
-              fieldProps: {
+              componentProps: {
                 options: districtOptions,
-                placeholder: "请选择区县",
               },
             },
           ]
@@ -154,32 +205,32 @@ const fullFeatureColumns: SchemaFormColumnType<DemoFormValues>[] = [
   },
 
   // 多层dependency - 根据VIP状态动态生成字段
-  {
-    valueType: "dependency",
-    to: ["isVip"],
-    children: (changedValues, _form) => {
-      const { isVip } = changedValues
+  // {
+  //   componentType: "dependency",
+  //   to: ["isVip"],
+  //   children: (changedValues, _form) => {
+  //     const { isVip } = changedValues
 
-      console.log("dependency isVip 变化:", isVip)
+  //     console.log("dependency isVip 变化:", isVip)
 
-      if (isVip) {
-        return [
-          {
-            label: "VIP专属字段",
-            name: "dependencyColumn",
-            valueType: "text",
-            required: true,
-            rules: [{ required: true, message: "请输入VIP信息" }],
-            fieldProps: {
-              placeholder: "这是VIP用户的专属字段",
-            },
-          },
-        ]
-      }
+  //     if (isVip) {
+  //       return [
+  //         {
+  //           label: "VIP专属字段",
+  //           name: "dependencyColumn",
+  //           componentType: "text",
+  //           required: true,
+  //           rules: [{ required: true, message: "请输入VIP信息" }],
+  //           componentProps: {
+  //             placeholder: "这是VIP用户的专属字段",
+  //           },
+  //         },
+  //       ]
+  //     }
 
-      return []
-    },
-  },
+  //     return []
+  //   },
+  // },
 ]
 
 // 根据城市获取区县选项
@@ -302,7 +353,7 @@ const SchemaFormDemo: React.FC = () => {
           </Button>
         </div>
 
-        <SchemaForm<DemoFormValues>
+        <BetaSchemaForm<DemoFormValues>
           layout="horizontal"
           formRef={formRef}
           columns={fullFeatureColumns}
@@ -311,15 +362,6 @@ const SchemaFormDemo: React.FC = () => {
           onValuesChange={handleValuesChange}
           showSubmitButton={true}
           submitButtonText="完成提交"
-          initialValues={{
-            name: "name11",
-            age: undefined,
-            gender: "male",
-            isVip: false,
-            hobbies: [],
-            city: "beijing",
-            district: "",
-          }}
         />
       </Card>
       {/* <Demo /> */}

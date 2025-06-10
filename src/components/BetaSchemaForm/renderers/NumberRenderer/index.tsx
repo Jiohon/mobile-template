@@ -2,7 +2,7 @@ import React from "react"
 
 import { Input } from "antd-mobile"
 
-import { SchemaFormExpandRendererPropsType, SchemaFormValuesType } from "../../types"
+import { ExpandRendererPropsType, SchemaFormValuesType } from "../../types"
 
 import type { InputProps } from "antd-mobile"
 import "./index.less"
@@ -11,7 +11,7 @@ import "./index.less"
  * NumberRenderer组件的Props类型
  */
 export interface NumberRendererProps<T extends SchemaFormValuesType>
-  extends SchemaFormExpandRendererPropsType<"number", InputProps, T> {
+  extends ExpandRendererPropsType<"number", InputProps, T> {
   type?: "number" | "digit"
 }
 
@@ -22,24 +22,19 @@ export interface NumberRendererProps<T extends SchemaFormValuesType>
  */
 const NumberRenderer = <T extends SchemaFormValuesType>({
   value,
-  onChange,
   disabled,
   type = "number",
+  formItemProps,
   ...restProps
 }: NumberRendererProps<T>): React.ReactElement => {
-  // 处理 onChange 事件，确保类型兼容和数值转换
-  const handleChange = (val: string) => {
-    const numValue = val === "" ? undefined : Number(val)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onChange?.(numValue as any)
-  }
+  const placeholder = restProps?.placeholder || `请输入${formItemProps.label}`
 
   return (
     <Input
       type={type}
       value={value?.toString() || ""}
-      onChange={handleChange}
       disabled={disabled}
+      placeholder={placeholder}
       {...restProps}
     />
   )

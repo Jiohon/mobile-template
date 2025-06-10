@@ -1,6 +1,6 @@
 import { Selector } from "antd-mobile"
 
-import { SchemaFormExpandRendererPropsType, SchemaFormValuesType } from "../../types"
+import { ExpandRendererPropsType, SchemaFormValuesType } from "../../types"
 
 import type { SelectorProps } from "antd-mobile"
 import "./index.less"
@@ -11,7 +11,7 @@ type SelectorValue = string | number
  * SelectRenderer组件的Props类型
  */
 export interface SelectRendererProps<T extends SchemaFormValuesType>
-  extends SchemaFormExpandRendererPropsType<"select", SelectorProps<SelectorValue>, T> {}
+  extends ExpandRendererPropsType<"select", SelectorProps<SelectorValue>, T> {}
 
 /**
  * 选择器渲染器
@@ -25,7 +25,6 @@ const SelectRenderer = <T extends SchemaFormValuesType>({
   formItemProps,
   ...restProps
 }: SelectRendererProps<T>) => {
-  console.log("restProps", restProps)
   // Form.Item 会自动传递 value 和 onChange，无需手动处理
   return (
     <div className="schema-form-select-renderer">

@@ -1,6 +1,6 @@
 import { Switch } from "antd-mobile"
 
-import { SchemaFormExpandRendererPropsType, SchemaFormValuesType } from "../../types"
+import { ExpandRendererPropsType, SchemaFormValuesType } from "../../types"
 
 import type { SwitchProps } from "antd-mobile"
 import "./index.less"
@@ -9,7 +9,7 @@ import "./index.less"
  * SwitchRenderer组件的Props类型
  */
 export interface SwitchRendererProps<T extends SchemaFormValuesType>
-  extends SchemaFormExpandRendererPropsType<"switch", SwitchProps, T> {
+  extends ExpandRendererPropsType<"switch", SwitchProps, T> {
   value?: boolean
 }
 

@@ -1,6 +1,6 @@
 import { Slider } from "antd-mobile"
 
-import { SchemaFormExpandRendererPropsType, SchemaFormValuesType } from "../../types"
+import { ExpandRendererPropsType, SchemaFormValuesType } from "../../types"
 
 import type { SliderProps } from "antd-mobile"
 import "./index.less"
@@ -9,7 +9,7 @@ import "./index.less"
  * SliderRenderer组件的Props类型
  */
 export interface SliderRendererProps<T extends SchemaFormValuesType>
-  extends SchemaFormExpandRendererPropsType<"slider", SliderProps, T> {}
+  extends ExpandRendererPropsType<"slider", SliderProps, T> {}
 
 /**
  * 滑块渲染器

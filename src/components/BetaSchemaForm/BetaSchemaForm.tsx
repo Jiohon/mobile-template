@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useImperativeHandle, useMemo, useState } from "react"
+import { useCallback, useImperativeHandle, useMemo, useState } from "react"
 
 import { Button, Form } from "antd-mobile"
 import classnames from "classnames"
 import { cloneDeep } from "lodash"
 
-import { createRenderConfig, createSchemaRenderer } from "./core"
+import { createSchemaRenderer } from "./core"
 import { registerDefaultRenderers } from "./core/registerRenderers"
 import {
   SchemaFormBaseColumnType,
@@ -15,7 +15,7 @@ import {
   SchemaFormValuesType,
 } from "./types"
 
-const SchemaForm = <TValues extends SchemaFormValuesType = SchemaFormValuesType>({
+const BetaSchemaForm = <TValues extends SchemaFormValuesType = SchemaFormValuesType>({
   columns = [],
   initialValues = {},
   onValuesChange,
@@ -56,16 +56,12 @@ const SchemaForm = <TValues extends SchemaFormValuesType = SchemaFormValuesType>
 
   // 分离基础字段和依赖字段
   const baseColumns = useMemo(() => {
-    return columns.filter((column) => column.valueType !== "dependency")
+    return columns.filter((column) => column.componentType !== "dependency")
   }, [columns])
 
   const dependencyColumns = useMemo(() => {
-    return columns.filter((column) => column.valueType === "dependency")
+    return columns.filter((column) => column.componentType === "dependency")
   }, [columns])
-
-  useEffect(() => {
-    form.setFieldsValue(initialValues)
-  }, [form, initialValues])
 
   // 使用 useImperativeHandle 暴露表单实例方法到 formRef
   useImperativeHandle(formRef, (): SchemaFormInstance => {
@@ -102,12 +98,8 @@ const SchemaForm = <TValues extends SchemaFormValuesType = SchemaFormValuesType>
   // 渲染单个表单字段
   const renderFormColumn = (column: SchemaFormBaseColumnType<TValues>, key: string) => {
     try {
-      // 创建渲染配置
-      const renderConfig = createRenderConfig<TValues>(column, initialValues, form)
-      if (!renderConfig) return null
-
       // 渲染字段元素
-      const columnElement = schemaRenderer.render(renderConfig)
+      const columnElement = schemaRenderer.render(column, form)
       if (!columnElement) {
         return null
       }
@@ -132,18 +124,16 @@ const SchemaForm = <TValues extends SchemaFormValuesType = SchemaFormValuesType>
     index: number
   ) => {
     return (
-      <Form.Subscribe
-        key={`dependency-${index}`}
-        to={depColumn.to.map((columnName) => columnName as string)}
-      >
+      <Form.Subscribe key={`dependency-${index}`} to={depColumn.to.map((columnName) => columnName)}>
         {(changedValues, _formInstance) => {
+          const { children } = depColumn
           try {
             // 调用 children 函数生成动态字段
-            const dependencyColumns = depColumn.children(changedValues as Partial<TValues>, form)
+            const dependencyColumns = children(changedValues as Partial<TValues>, form)
 
             // 渲染动态字段
             return dependencyColumns.map((column, columnIndex) => {
-              if (column.valueType === "dependency") {
+              if (column.componentType === "dependency") {
                 // 嵌套的依赖字段
                 return renderDependencyColumn(column, columnIndex)
               } else {
@@ -205,4 +195,4 @@ const SchemaForm = <TValues extends SchemaFormValuesType = SchemaFormValuesType>
   )
 }
 
-export default SchemaForm
+export default BetaSchemaForm
