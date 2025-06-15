@@ -22,7 +22,7 @@
 - **构建工具**: Vite 5.0.0
 - **语言**: TypeScript 5.2.2
 - **UI 组件**: antd-mobile 5.36.1
-- **路由**: react-router-dom 6.20.1
+- **路由**: react-router 7.6.2
 - **状态管理**: zustand 4.4.7
 - **HTTP 客户端**: alova 3.0.9
 - **样式**: Less 4.2.0

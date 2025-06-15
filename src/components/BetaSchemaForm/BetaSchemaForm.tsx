@@ -6,6 +6,7 @@ import { cloneDeep } from "lodash"
 
 import { createSchemaRenderer } from "./core"
 import { registerDefaultRenderers } from "./core/registerRenderers"
+import styles from "./index.module.less"
 import {
   SchemaFormBaseColumnType,
   SchemaFormDependencyColumnType,
@@ -151,10 +152,10 @@ const BetaSchemaForm = <TValues extends SchemaFormValuesType = SchemaFormValuesT
   }
 
   return (
-    <div className={classnames("schema-form", className)}>
+    <div className={classnames(styles.schemaForm, className)}>
       <Form
         form={form}
-        className={classnames("schema-form", className)}
+        className={classnames(className)}
         disabled={disabled}
         initialValues={initialValues}
         onValuesChange={handleValuesChange}

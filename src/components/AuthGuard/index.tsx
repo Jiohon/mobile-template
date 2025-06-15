@@ -1,7 +1,7 @@
 import { ReactNode, useEffect } from "react"
 
 import { SpinLoading } from "antd-mobile"
-import { useLocation, useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router"
 
 import { useAuthStore } from "@/stores/auth"
 
@@ -12,11 +12,7 @@ interface AuthGuardProps {
 const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const navigate = useNavigate()
   const location = useLocation()
-  const { isAuthenticated, isLoading, checkAuth } = useAuthStore()
-
-  useEffect(() => {
-    checkAuth()
-  }, [checkAuth])
+  const { isAuthenticated, isLoading } = useAuthStore()
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {

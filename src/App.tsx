@@ -1,22 +1,21 @@
-import { useEffect } from "react"
+import { useMemo } from "react"
 
 import { ConfigProvider } from "antd-mobile"
 import zhCN from "antd-mobile/es/locales/zh-CN"
-import { RouterProvider } from "react-router-dom"
+import { RouterProvider } from "react-router"
 
 import { createDynamicRouter } from "@/router"
 import { useAuthStore } from "@/stores/auth"
+
 import "@/styles/global.less"
 
 function App() {
-  const { checkAuth } = useAuthStore()
+  const { userRolesSet, userPermissionsSet } = useAuthStore()
 
-  useEffect(() => {
-    checkAuth()
-  }, [checkAuth])
-
-  const router = createDynamicRouter()
-
+  const router = useMemo(
+    () => createDynamicRouter(userRolesSet, userPermissionsSet),
+    [userRolesSet, userPermissionsSet]
+  )
   return (
     <ConfigProvider locale={zhCN}>
       <RouterProvider router={router} />

@@ -1,27 +1,103 @@
 .container {
-  padding: 16px;
+  --gap-vertical: 14px;
+
+  padding: 14px;
   background-color: #f5f5f5;
-  min-height: 100vh;
 }
 
-.card {
-  margin-bottom: 16px;
+.header {
+  text-align: center;
 
-  :global(.adm-card-body) {
-    padding: 16px;
+  .title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 8px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: #666;
+    line-height: 1.4;
   }
 }
 
-.preview {
-  background-color: #f8f9fa;
-  border: 1px solid #e9ecef;
-  border-radius: 8px;
+.actionBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   padding: 12px;
+  background-color: #fff;
+  border-radius: 8px;
+}
+
+.formContainer {
+  background-color: #fff;
+  border-radius: 8px;
+}
+
+.previewContent {
   font-size: 12px;
-  line-height: 1.4;
-  color: #495057;
+  line-height: 1.5;
+  color: #6c757d;
   white-space: pre-wrap;
-  word-break: break-all;
-  max-height: 400px;
-  overflow-y: auto;
+  word-break: break-word;
+  font-family: "Courier New", monospace;
+  background-color: #fff;
+  padding: 12px;
+  border-radius: 4px;
+  border: 1px solid #dee2e6;
+}
+
+.emptyPreview {
+  text-align: center;
+  color: #adb5bd;
+  font-style: italic;
+  padding: 20px;
+}
+
+.statsBar {
+  display: flex;
+  justify-content: space-around;
+  padding: 12px;
+  background-color: #fff;
+  border-radius: 8px;
+
+  .statItem {
+    text-align: center;
+
+    .statValue {
+      font-size: 18px;
+      font-weight: bold;
+      color: #1890ff;
+      margin-bottom: 4px;
+    }
+
+    .statLabel {
+      font-size: 12px;
+      color: #666;
+    }
+  }
+}
+
+// 响应式设计
+@media (max-width: 480px) {
+  .actionBar {
+    :global(.adm-button) {
+      font-size: 11px;
+      padding: 6px 8px;
+    }
+  }
+
+  .statsBar {
+    .statItem {
+      .statValue {
+        font-size: 16px;
+      }
+
+      .statLabel {
+        font-size: 11px;
+      }
+    }
+  }
 }

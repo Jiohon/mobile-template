@@ -120,7 +120,7 @@ export const isProd = env.APP_ENV === "production"
 export const isStaging = env.APP_ENV === "staging"
 
 /**
- * 打印环境配置（仅开发环境）
+ * 开发环境初始化（如需要可在此处添加开发专用逻辑）
  */
 if (isDev) {
   console.log("🔧 环境配置已加载:", env)

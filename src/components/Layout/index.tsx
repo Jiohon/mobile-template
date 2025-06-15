@@ -1,14 +1,8 @@
 import { useMemo } from "react"
 
 import { TabBar } from "antd-mobile"
-import {
-  AppOutline,
-  FileOutline,
-  TeamOutline,
-  UnorderedListOutline,
-  UserOutline,
-} from "antd-mobile-icons"
-import { Outlet, useLocation, useNavigate } from "react-router-dom"
+import { AppOutline, FileOutline, UserOutline } from "antd-mobile-icons"
+import { Outlet, useLocation, useNavigate } from "react-router"
 
 import { useAuthStore } from "@/stores/auth"
 import { shouldShowMenuItem } from "@/utils/permission"
@@ -19,7 +13,7 @@ const Layout: React.FC = () => {
   const navigate = useNavigate()
   const location = useLocation()
   const { pathname } = location
-  const { user } = useAuthStore()
+  const { userRolesSet, userPermissionsSet } = useAuthStore()
 
   // 根据用户权限动态生成底部导航
   const tabs = useMemo(() => {
@@ -37,13 +31,10 @@ const Layout: React.FC = () => {
         permission: { requireAuth: false },
       },
       {
-        key: "/admin/users",
-        title: "管理",
-        icon: <TeamOutline />,
-        permission: {
-          requireAuth: true,
-          roles: ["admin"],
-        },
+        key: "/access-demo",
+        title: "权限",
+        icon: <FileOutline />,
+        permission: { requireAuth: false },
       },
       {
         key: "/profile",
@@ -51,17 +42,15 @@ const Layout: React.FC = () => {
         icon: <UserOutline />,
         permission: { requireAuth: true },
       },
-      {
-        key: "/settings",
-        title: "设置",
-        icon: <UnorderedListOutline />,
-        permission: { requireAuth: true },
-      },
     ]
 
     // 根据权限过滤菜单项
-    return allTabs.filter((tab) => shouldShowMenuItem(tab.permission, user))
-  }, [user])
+    return allTabs.filter((tab) =>
+      shouldShowMenuItem(tab.permission, userRolesSet, userPermissionsSet)
+    )
+  }, [userRolesSet, userPermissionsSet])
+
+  const isTabbarPage = tabs.some((tab) => tab.key === pathname)
 
   const setRouteActive = (value: string) => {
     navigate(value)
@@ -72,13 +61,15 @@ const Layout: React.FC = () => {
       <div className={styles.content}>
         <Outlet />
       </div>
-      <div className={styles.tabBar}>
-        <TabBar activeKey={pathname} onChange={setRouteActive} safeArea>
-          {tabs.map((item) => (
-            <TabBar.Item key={item.key} icon={item.icon} title={item.title} />
-          ))}
-        </TabBar>
-      </div>
+      {isTabbarPage && (
+        <div className={styles.tabBar}>
+          <TabBar activeKey={pathname} onChange={setRouteActive} safeArea>
+            {tabs.map((item) => (
+              <TabBar.Item key={item.key} icon={item.icon} title={item.title} />
+            ))}
+          </TabBar>
+        </div>
+      )}
     </div>
   )
 }

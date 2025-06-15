@@ -23,7 +23,7 @@ export const createProdConfig = (_env: Record<string, string>): UserConfig => {
           assetFileNames: "assets/[ext]/[name]-[hash].[ext]",
           manualChunks: {
             // React 相关
-            "vendor-react": ["react", "react-dom", "react-router-dom"],
+            "vendor-react": ["react", "react-dom", "react-router"],
             // UI 组件库
             "vendor-antd": ["antd-mobile", "antd-mobile-icons"],
             // 工具库

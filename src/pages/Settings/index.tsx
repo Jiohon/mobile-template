@@ -16,21 +16,21 @@ const Settings: React.FC = () => {
 
       <Card title="隐私设置">
         <List>
-          <List.Item prefix="🔒" title="隐私设置" clickable arrow={<RightOutline />} />
-          <List.Item prefix="🗂" title="数据管理" clickable arrow={<RightOutline />} />
+          <List.Item prefix="🔒" title="隐私设置" clickable arrowIcon={<RightOutline />} />
+          <List.Item prefix="🗂" title="数据管理" clickable arrowIcon={<RightOutline />} />
         </List>
       </Card>
 
       <Card title="帮助与支持">
         <List>
-          <List.Item prefix="❓" title="帮助中心" clickable arrow={<RightOutline />} />
-          <List.Item prefix="💬" title="意见反馈" clickable arrow={<RightOutline />} />
+          <List.Item prefix="❓" title="帮助中心" clickable arrowIcon={<RightOutline />} />
+          <List.Item prefix="💬" title="意见反馈" clickable arrowIcon={<RightOutline />} />
           <List.Item
             prefix="📊"
             title="检查更新"
             description="v1.0.0"
             clickable
-            arrow={<RightOutline />}
+            arrowIcon={<RightOutline />}
           />
         </List>
       </Card>

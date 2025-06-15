@@ -12,7 +12,7 @@ import type { SliderRendererProps } from "./renderers/SliderRenderer"
 import type { SwitchRendererProps } from "./renderers/SwitchRenderer"
 import type { TextRendererProps } from "./renderers/TextRenderer"
 import type { UploadRendererProps } from "./renderers/UploadRenderer"
-import type { FormProps as AntdMobileFormProps, SelectorOption } from "antd-mobile"
+import type { FormProps as AntdMobileFormProps, ButtonProps, SelectorOption } from "antd-mobile"
 import type { FormInstance as AntdMobileFormInstance } from "antd-mobile/es/components/form"
 import type { FormItemProps as AntdMobileFormItemProps } from "antd-mobile/es/components/form/form-item"
 import type { ValidateErrorEntity } from "rc-field-form/es/interface"
@@ -187,7 +187,7 @@ export type SchemaFormProps<TValues extends SchemaFormValuesType> = Omit<
   /** 提交按钮文本 */
   submitButtonText?: string
   /** 提交按钮属性 */
-  submitButtonProps?: Record<string, unknown>
+  submitButtonProps?: ButtonProps
   /** 表单实例引用 */
   formRef?: React.RefObject<SchemaFormInstance>
 }

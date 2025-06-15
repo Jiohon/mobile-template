@@ -1,3 +1,5 @@
+import { PermissionsType } from "./router"
+
 export interface User {
   id: string
   username: string
@@ -5,7 +7,7 @@ export interface User {
   phone?: string
   avatar?: string
   roles: string[]
-  permissions: string[]
+  permissions: PermissionsType[]
   createTime: string
   updateTime: string
 }
@@ -20,11 +22,4 @@ export interface LoginResponse {
   token: string
   refreshToken: string
   user: User
-}
-
-export interface AuthState {
-  user: User | null
-  token: string | null
-  isAuthenticated: boolean
-  isLoading: boolean
 }

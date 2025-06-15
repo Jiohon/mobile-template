@@ -2,22 +2,26 @@ import { useState } from "react"
 
 import { Button, Card, Form, Input, Toast } from "antd-mobile"
 import { EyeInvisibleOutline, EyeOutline } from "antd-mobile-icons"
-import { useLocation, useNavigate } from "react-router-dom"
+import { Navigate, useLocation } from "react-router"
 
 import { useAuthStore } from "@/stores/auth"
 
 import styles from "./index.module.less"
 
 const Login: React.FC = () => {
-  const navigate = useNavigate()
   const location = useLocation()
   const [form] = Form.useForm()
   const [loading, setLoading] = useState(false)
   const [visible, setVisible] = useState(false)
-  const { login } = useAuthStore()
+  const { isAuthenticated, login } = useAuthStore()
 
   // 获取来源路径，如果没有则默认跳转到首页
-  const from = (location.state as any)?.from || "/home"
+  const from = (location.state as any)?.from || "/profile"
+
+  // 如果已登录，直接重定向
+  if (isAuthenticated) {
+    return <Navigate to={from} replace />
+  }
 
   const onFinish = async (values: any) => {
     setLoading(true)
@@ -28,9 +32,6 @@ const Login: React.FC = () => {
         icon: "success",
         content: "登录成功",
       })
-
-      // 登录成功后跳转到原始页面或首页
-      navigate(from, { replace: true })
     } catch (error) {
       console.error("❌ [Login] 登录失败:", error)
     } finally {
@@ -53,6 +54,10 @@ const Login: React.FC = () => {
           layout="horizontal"
           form={form}
           onFinish={onFinish}
+          initialValues={{
+            username: "admin",
+            password: "123456",
+          }}
           footer={
             <Button block type="submit" color="primary" size="large" loading={loading}>
               登录
@@ -86,6 +91,9 @@ const Login: React.FC = () => {
       <div className={styles.demo}>
         <p>演示账号：</p>
         <p>用户名：admin</p>
+        <p>密码：123456</p>
+        <p>演示账号：</p>
+        <p>用户名：user</p>
         <p>密码：123456</p>
       </div>
     </div>

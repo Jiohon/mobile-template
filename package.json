@@ -40,13 +40,14 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-i18next": "^13.5.0",
-    "react-router-dom": "^6.20.1",
+    "react-router": "^7.6.2",
     "ryt-jssdk": "^1.4.6",
     "zustand": "^4.4.7"
   },
   "devDependencies": {
     "@types/classnames": "^2.3.4",
     "@types/lodash": "^4.17.17",
+    "@types/mockjs": "^1.0.10",
     "@types/node": "^22.15.29",
     "@types/react": "^18.2.37",
     "@types/react-dom": "^18.2.15",
@@ -64,11 +65,13 @@
     "husky": "^9.1.7",
     "less": "^4.2.0",
     "lint-staged": "^16.1.0",
+    "mockjs": "^1.1.0",
     "prettier": "^3.1.0",
     "terser": "^5.40.0",
     "tsx": "^4.19.4",
     "typescript": "^5.2.2",
     "vite": "^5.0.0",
+    "vite-plugin-mock": "^3.0.2",
     "vite-plugin-pwa": "^0.17.4"
   },
   "lint-staged": {

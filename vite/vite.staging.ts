@@ -21,7 +21,7 @@ export const createStagingConfig = (_env: Record<string, string>): UserConfig =>
           entryFileNames: "assets/js/[name]-[hash].js",
           assetFileNames: "assets/[ext]/[name]-[hash].[ext]",
           manualChunks: {
-            "vendor-react": ["react", "react-dom", "react-router-dom"],
+            "vendor-react": ["react", "react-dom", "react-router"],
             "vendor-antd": ["antd-mobile", "antd-mobile-icons"],
             "vendor-utils": ["alova", "dayjs", "classnames"],
           },

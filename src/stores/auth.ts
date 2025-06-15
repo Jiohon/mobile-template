@@ -1,16 +1,26 @@
+import _ from "lodash"
 import { create } from "zustand"
 import { createJSONStorage, persist } from "zustand/middleware"
 
 import { loginApi, logoutApi, refreshTokenApi } from "@/api"
-import { AuthState, User } from "@/types/auth"
-import { getToken, removeToken, setToken } from "@/utils/auth"
+import { User } from "@/types/auth"
+import type { PermissionsType } from "@/types/router"
+import { removeToken, setToken } from "@/utils/token"
+
+export interface AuthState {
+  user: User | null
+  token: string | null
+  isAuthenticated: boolean
+  isLoading: boolean
+  userRolesSet: Set<string>
+  userPermissionsSet: Set<PermissionsType>
+}
 
 interface AuthStore extends AuthState {
   login: (data: { username: string; password: string }) => Promise<void>
   logout: () => Promise<void>
   updateUser: (user: Partial<User>) => void
   refreshToken: () => Promise<void>
-  checkAuth: () => void
 }
 
 export const useAuthStore = create<AuthStore>()(
@@ -20,6 +30,12 @@ export const useAuthStore = create<AuthStore>()(
       token: null,
       isAuthenticated: false,
       isLoading: false,
+      userRolesSet: new Set(),
+      userPermissionsSet: new Set(),
+
+      getUserPermissionsSet: () => {
+        return get().userPermissionsSet
+      },
 
       login: async (data: { username: string; password: string }) => {
         set({ isLoading: true })
@@ -36,6 +52,8 @@ export const useAuthStore = create<AuthStore>()(
             token,
             isAuthenticated: true,
             isLoading: false,
+            userRolesSet: new Set(user.roles || []),
+            userPermissionsSet: new Set(user.permissions || []),
           })
         } catch (error) {
           set({ isLoading: false })
@@ -55,6 +73,8 @@ export const useAuthStore = create<AuthStore>()(
             user: null,
             token: null,
             isAuthenticated: false,
+            userRolesSet: new Set(),
+            userPermissionsSet: new Set(),
           })
         }
       },
@@ -62,7 +82,10 @@ export const useAuthStore = create<AuthStore>()(
       updateUser: (userData: Partial<User>) => {
         const { user } = get()
         if (user) {
-          const updatedUser = { ...user, ...userData }
+          const updatedUser = {
+            ...user,
+            ...userData,
+          }
           set({
             user: updatedUser,
           })
@@ -94,48 +117,6 @@ export const useAuthStore = create<AuthStore>()(
           throw error
         }
       },
-
-      checkAuth: () => {
-        set({ isLoading: true })
-        const token = getToken()
-        const currentUser = get().user
-
-        if (token) {
-          // 如果有token但没有用户信息，可能是持久化存储中的数据丢失，
-          // 在真实环境中应该尝试用token请求用户信息
-          if (!currentUser) {
-            // 这里使用模拟数据，实际项目中应通过API获取
-            const mockUser: User = {
-              id: "1",
-              username: "admin",
-              email: "admin@example.com",
-              roles: ["admin"],
-              permissions: ["user:read", "system:config"],
-              createTime: new Date().toISOString(),
-              updateTime: new Date().toISOString(),
-            }
-            set({
-              isAuthenticated: true,
-              token,
-              user: mockUser,
-              isLoading: false,
-            })
-          } else {
-            set({
-              isAuthenticated: true,
-              token,
-              isLoading: false,
-            })
-          }
-        } else {
-          set({
-            isAuthenticated: false,
-            token: null,
-            user: null,
-            isLoading: false,
-          })
-        }
-      },
     }),
     {
       name: "auth-store",
@@ -144,7 +125,16 @@ export const useAuthStore = create<AuthStore>()(
         user: state.user,
         token: state.token,
         isAuthenticated: state.isAuthenticated,
+        userRolesSet: state.userRolesSet,
+        userPermissionsSet: state.userPermissionsSet,
       }),
+      merge: (persistedState, currentState) => {
+        return _.merge(currentState, {
+          ...(persistedState as AuthState),
+          userRolesSet: new Set((persistedState as AuthState)?.user?.roles || []),
+          userPermissionsSet: new Set((persistedState as AuthState)?.user?.permissions || []),
+        })
+      },
     }
   )
 )

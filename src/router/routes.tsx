@@ -1,13 +1,15 @@
-import { RouteConfig } from "@/types/router"
+import { lazy } from "react"
+
+import type { RouteConfig } from "@/types/router"
 
 export const routes: RouteConfig[] = [
   {
     path: "/login",
     name: "Login",
-    element: () => import("@/pages/Login"),
+    element: lazy(() => import("@/pages/Login")),
     meta: {
       title: "登录",
-      permission: {
+      access: {
         requireAuth: false,
       },
     },
@@ -18,7 +20,7 @@ export const routes: RouteConfig[] = [
     redirect: "/home",
     meta: {
       title: "根路径",
-      permission: {
+      access: {
         requireAuth: false,
       },
     },
@@ -30,7 +32,7 @@ export const routes: RouteConfig[] = [
     meta: {
       title: "首页",
       icon: "🏠",
-      permission: {
+      access: {
         requireAuth: true,
       },
     },
@@ -42,7 +44,7 @@ export const routes: RouteConfig[] = [
     meta: {
       title: "个人中心",
       icon: "👤",
-      permission: {
+      access: {
         requireAuth: true,
       },
     },
@@ -54,7 +56,7 @@ export const routes: RouteConfig[] = [
     meta: {
       title: "设置",
       icon: "⚙️",
-      permission: {
+      access: {
         requireAuth: true,
       },
     },
@@ -66,7 +68,19 @@ export const routes: RouteConfig[] = [
     meta: {
       title: "动态表单演示",
       icon: "📋",
-      permission: {
+      access: {
+        requireAuth: false,
+      },
+    },
+  },
+  {
+    path: "/access-demo",
+    name: "AccessDemo",
+    element: () => import("@/pages/AccessDemo"),
+    meta: {
+      title: "权限系统演示",
+      icon: "🔐",
+      access: {
         requireAuth: false,
       },
     },
@@ -78,37 +92,23 @@ export const routes: RouteConfig[] = [
     meta: {
       title: "系统管理",
       icon: "👨‍💼",
-      permission: {
+      access: {
         requireAuth: true,
         roles: ["admin"],
       },
     },
     children: [
       {
-        path: "/admin/users",
+        path: "users",
         name: "UserManagement",
         element: () => import("@/pages/UserManagement"),
         meta: {
           title: "用户管理",
           icon: "👥",
-          permission: {
+          access: {
             requireAuth: true,
             roles: ["admin"],
-            permissions: ["user:read"],
-          },
-        },
-      },
-      {
-        path: "/admin/system",
-        name: "SystemSettings",
-        element: () => import("@/pages/SystemSettings"),
-        meta: {
-          title: "系统设置",
-          icon: "🔧",
-          permission: {
-            requireAuth: true,
-            roles: ["admin"],
-            permissions: ["system:config"],
+            permissions: ["user:*:*"],
           },
         },
       },
@@ -120,7 +120,7 @@ export const routes: RouteConfig[] = [
     element: () => import("@/pages/NotFound"),
     meta: {
       title: "页面不存在",
-      permission: {
+      access: {
         requireAuth: false,
       },
     },
