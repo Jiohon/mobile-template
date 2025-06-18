@@ -2,7 +2,7 @@ import { Avatar, Button, Card, List, Space } from "antd-mobile"
 import { RightOutline } from "antd-mobile-icons"
 import { useNavigate } from "react-router"
 
-import { Access, useAccess } from "@/hooks/useAccess"
+import { Access, useAccess } from "@/access"
 import { useAuthStore } from "@/stores/auth"
 
 import styles from "./index.module.less"

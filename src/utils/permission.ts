@@ -1,7 +1,5 @@
-import { PermissionsType, RouteAccess } from "@/types/router"
-import type { RouteConfig } from "@/types/router"
-
-import { hasAnyPermission, hasAnyRole } from "./auth"
+import { createAccess } from "@/access"
+import type { PermissionsType, RouteAccess, RouteConfig } from "@/types/router"
 
 /**
  * 检查用户是否有访问路由的权限
@@ -18,12 +16,12 @@ export const checkRoutePermission = (
   if (!routeAccess) return true
 
   // 检查角色权限
-  if (!hasAnyRole(userRolesSet, routeAccess?.roles || [])) {
+  if (!createAccess({ userRolesSet }).hasAnyRole(routeAccess?.roles || [])) {
     return false
   }
 
   // 检查具体权限
-  if (!hasAnyPermission(userPermissionsSet, routeAccess?.permissions || [])) {
+  if (!createAccess({ userPermissionsSet }).hasAnyPermission(routeAccess?.permissions || [])) {
     return false
   }
 

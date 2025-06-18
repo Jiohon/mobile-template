@@ -1,15 +1,17 @@
-import CheckboxRenderer from "../renderers/CheckboxRenderer"
-import CustomRenderer from "../renderers/CustomRenderer"
-import DateRenderer from "../renderers/DateRenderer"
-import NumberRenderer from "../renderers/NumberRenderer"
-import PickerRenderer from "../renderers/PickerRenderer"
-import RadioRenderer from "../renderers/RadioRenderer"
-import RateRenderer from "../renderers/RateRenderer"
-import SelectRenderer from "../renderers/SelectRenderer"
-import SliderRenderer from "../renderers/SliderRenderer"
-import SwitchRenderer from "../renderers/SwitchRenderer"
-import TextRenderer from "../renderers/TextRenderer"
-import UploadRenderer from "../renderers/UploadRenderer"
+import {
+  CheckboxRenderer,
+  CustomRenderer,
+  DateRenderer,
+  NumberRenderer,
+  PickerRenderer,
+  RadioRenderer,
+  RateRenderer,
+  SelectRenderer,
+  SliderRenderer,
+  SwitchRenderer,
+  TextRenderer,
+  UploadRenderer,
+} from "../renderers"
 import { SchemaFormValuesType } from "../types"
 
 import { SchemaRenderer } from "./index"

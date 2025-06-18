@@ -21,8 +21,22 @@ export const removeToken = (): void => {
 }
 
 /**
- * 检查是否已登录
+ * 获取refreshToken
  */
-export const isAuthenticated = (): boolean => {
-  return !!getToken()
+export const getRefreshToken = (): string | null => {
+  return localStorage.getItem("refreshToken")
+}
+
+/**
+ * 设置refreshToken
+ */
+export const setRefreshToken = (refreshToken: string): void => {
+  localStorage.setItem("refreshToken", refreshToken)
+}
+
+/**
+ * 移除refreshToken
+ */
+export const removeRefreshToken = (): void => {
+  localStorage.removeItem("refreshToken")
 }

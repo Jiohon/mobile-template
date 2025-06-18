@@ -12,7 +12,7 @@ interface AuthGuardProps {
 const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
   const navigate = useNavigate()
   const location = useLocation()
-  const { isAuthenticated, isLoading } = useAuthStore()
+  const { isAuthenticated, isLoading, isManualLogout } = useAuthStore()
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -23,13 +23,13 @@ const AuthGuard: React.FC<AuthGuardProps> = ({ children }) => {
       if (currentPath !== "/") {
         navigate("/login", {
           replace: true,
-          state: { from: currentPath },
+          state: { from: isManualLogout ? "/" : currentPath },
         })
       } else {
         navigate("/login", { replace: true })
       }
     }
-  }, [isAuthenticated, isLoading, navigate, location])
+  }, [isAuthenticated, isLoading, isManualLogout, navigate, location])
 
   if (isLoading) {
     return (

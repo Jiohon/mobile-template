@@ -4,7 +4,7 @@ import { Button, Card, Grid, ProgressBar, Space, Tag } from "antd-mobile"
 import { FileOutline, TeamOutline, UserOutline } from "antd-mobile-icons"
 import { useNavigate } from "react-router"
 
-import { Access, useAccess } from "@/hooks/useAccess"
+import { Access, useAccess } from "@/access"
 
 import styles from "./index.module.less"
 

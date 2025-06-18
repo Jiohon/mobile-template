@@ -1,17 +1,20 @@
 import React from "react"
 
-import type { CheckboxRendererProps } from "./renderers/CheckboxRenderer"
-import type { CustomRendererProps } from "./renderers/CustomRenderer"
-import type { DateRendererProps } from "./renderers/DateRenderer"
-import type { NumberRendererProps } from "./renderers/NumberRenderer"
-import type { PickerRendererProps } from "./renderers/PickerRenderer"
-import type { RadioRendererProps } from "./renderers/RadioRenderer"
-import type { RateRendererProps } from "./renderers/RateRenderer"
-import type { SelectRendererProps } from "./renderers/SelectRenderer"
-import type { SliderRendererProps } from "./renderers/SliderRenderer"
-import type { SwitchRendererProps } from "./renderers/SwitchRenderer"
-import type { TextRendererProps } from "./renderers/TextRenderer"
-import type { UploadRendererProps } from "./renderers/UploadRenderer"
+import type {
+  CheckboxRendererProps,
+  CustomRendererProps,
+  DateRendererProps,
+  NumberRendererProps,
+  PickerRendererProps,
+  RadioRendererProps,
+  RateRendererProps,
+  SelectRendererProps,
+  SliderRendererProps,
+  SwitchRendererProps,
+  TextAreaRendererProps,
+  TextRendererProps,
+  UploadRendererProps,
+} from "./renderers"
 import type { FormProps as AntdMobileFormProps, ButtonProps, SelectorOption } from "antd-mobile"
 import type { FormInstance as AntdMobileFormInstance } from "antd-mobile/es/components/form"
 import type { FormItemProps as AntdMobileFormItemProps } from "antd-mobile/es/components/form/form-item"
@@ -22,7 +25,7 @@ import type { ValidateErrorEntity } from "rc-field-form/es/interface"
  * 表单数据的基础类型约束
  * 所有表单数据类型都必须继承此类型
  */
-export type SchemaFormValuesType = Record<string, unknown>
+export type SchemaFormValuesType = unknown
 
 /**
  * 重新导出 antd-mobile 的选项类型
@@ -81,6 +84,7 @@ export type SchemaFormCompMap<TValues extends SchemaFormValuesType> = {
   picker: PickerRendererProps<TValues>
   rate: RateRendererProps<TValues>
   slider: SliderRendererProps<TValues>
+  textArea: TextAreaRendererProps<TValues>
   upload: UploadRendererProps<TValues>
   custom: CustomRendererProps<TValues>
 }
@@ -116,11 +120,13 @@ export type ExtractRendererCompPropsType<
 export type SchemaFormColumnConfigType<
   TCompType extends RendererCompNameType,
   TValues extends SchemaFormValuesType,
-> = Omit<AntdMobileFormItemProps, "name" | "children"> & {
+> = Omit<AntdMobileFormItemProps, "name" | "children" | "initialValue"> & {
   /** 字段名称，必须是表单数据中的键 */
   name: keyof TValues
   /** 字段类型标识符 */
   componentType: TCompType
+  /** 字段初始值 */
+  initialValue?: ExtractRendererCompPropsType<TCompType, TValues>["value"]
   /**
    * 字段属性配置
    * 排除 ExpandProps 组件内部字段

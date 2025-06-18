@@ -2,7 +2,7 @@ import React from "react"
 
 import { Button, Card, Space, Toast } from "antd-mobile"
 
-import { Access, useAccess } from "@/hooks/useAccess"
+import { Access, useAccess } from "@/access"
 
 import styles from "./index.module.less"
 

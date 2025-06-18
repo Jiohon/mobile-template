@@ -16,7 +16,7 @@ const Login: React.FC = () => {
   const { isAuthenticated, login } = useAuthStore()
 
   // 获取来源路径，如果没有则默认跳转到首页
-  const from = (location.state as any)?.from || "/profile"
+  const from = (location.state as any)?.from || "/home"
 
   // 如果已登录，直接重定向
   if (isAuthenticated) {

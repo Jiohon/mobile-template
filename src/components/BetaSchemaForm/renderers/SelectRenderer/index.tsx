@@ -1,4 +1,5 @@
 import { Selector } from "antd-mobile"
+import classNames from "classnames"
 
 import { ExpandRendererPropsType, SchemaFormValuesType } from "../../types"
 
@@ -15,21 +16,21 @@ export interface SelectRendererProps<T extends SchemaFormValuesType>
 
 /**
  * 选择器渲染器
- * 支持单选和多选（antd-mobile Selector 组件值始终为数组）
- * 完整继承 antd-mobile Selector 组件的所有功能
+ * 支持单选和多选
  */
 const SelectRenderer = <T extends SchemaFormValuesType>({
-  disabled,
   options = [],
-  multiple,
+  className,
   formItemProps,
+  formInstance,
   ...restProps
 }: SelectRendererProps<T>) => {
-  // Form.Item 会自动传递 value 和 onChange，无需手动处理
   return (
-    <div className="schema-form-select-renderer">
-      <Selector disabled={disabled} options={options} multiple={multiple} {...restProps} />
-    </div>
+    <Selector
+      className={classNames("schema-form-select-renderer", className)}
+      options={options}
+      {...restProps}
+    />
   )
 }
 

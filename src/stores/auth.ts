@@ -1,16 +1,22 @@
-import _ from "lodash"
+import { merge as lodashMerge } from "lodash-es"
 import { create } from "zustand"
 import { createJSONStorage, persist } from "zustand/middleware"
 
 import { loginApi, logoutApi, refreshTokenApi } from "@/api"
 import { User } from "@/types/auth"
 import type { PermissionsType } from "@/types/router"
-import { removeToken, setToken } from "@/utils/token"
+import {
+  getRefreshToken,
+  removeRefreshToken,
+  removeToken,
+  setRefreshToken,
+  setToken,
+} from "@/utils/token"
 
 export interface AuthState {
   user: User | null
-  token: string | null
   isAuthenticated: boolean
+  isManualLogout: boolean
   isLoading: boolean
   userRolesSet: Set<string>
   userPermissionsSet: Set<PermissionsType>
@@ -20,15 +26,15 @@ interface AuthStore extends AuthState {
   login: (data: { username: string; password: string }) => Promise<void>
   logout: () => Promise<void>
   updateUser: (user: Partial<User>) => void
-  refreshToken: () => Promise<void>
+  reRefreshToken: () => Promise<void>
 }
 
 export const useAuthStore = create<AuthStore>()(
   persist(
     (set, get) => ({
       user: null,
-      token: null,
       isAuthenticated: false,
+      isManualLogout: false,
       isLoading: false,
       userRolesSet: new Set(),
       userPermissionsSet: new Set(),
@@ -45,13 +51,13 @@ export const useAuthStore = create<AuthStore>()(
           const { token, refreshToken, user } = response
 
           setToken(token)
-          localStorage.setItem("refreshToken", refreshToken)
+          setRefreshToken(refreshToken)
 
           set({
             user,
-            token,
             isAuthenticated: true,
             isLoading: false,
+            isManualLogout: false,
             userRolesSet: new Set(user.roles || []),
             userPermissionsSet: new Set(user.permissions || []),
           })
@@ -68,11 +74,11 @@ export const useAuthStore = create<AuthStore>()(
           // 忽略登出API错误
         } finally {
           removeToken()
-          localStorage.removeItem("refreshToken")
+          removeRefreshToken()
           set({
             user: null,
-            token: null,
             isAuthenticated: false,
+            isManualLogout: true,
             userRolesSet: new Set(),
             userPermissionsSet: new Set(),
           })
@@ -92,8 +98,8 @@ export const useAuthStore = create<AuthStore>()(
         }
       },
 
-      refreshToken: async () => {
-        const refreshToken = localStorage.getItem("refreshToken")
+      reRefreshToken: async () => {
+        const refreshToken = getRefreshToken()
 
         if (!refreshToken) {
           get().logout()
@@ -105,11 +111,10 @@ export const useAuthStore = create<AuthStore>()(
           const { token, refreshToken: newRefreshToken, user } = response
 
           setToken(token)
-          localStorage.setItem("refreshToken", newRefreshToken)
+          setRefreshToken(newRefreshToken)
 
           set({
             user,
-            token,
             isAuthenticated: true,
           })
         } catch (error) {
@@ -123,13 +128,13 @@ export const useAuthStore = create<AuthStore>()(
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({
         user: state.user,
-        token: state.token,
         isAuthenticated: state.isAuthenticated,
+        isManualLogout: state.isManualLogout,
         userRolesSet: state.userRolesSet,
         userPermissionsSet: state.userPermissionsSet,
       }),
       merge: (persistedState, currentState) => {
-        return _.merge(currentState, {
+        return lodashMerge(currentState, {
           ...(persistedState as AuthState),
           userRolesSet: new Set((persistedState as AuthState)?.user?.roles || []),
           userPermissionsSet: new Set((persistedState as AuthState)?.user?.permissions || []),

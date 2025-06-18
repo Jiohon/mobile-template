@@ -7,13 +7,12 @@ import {
   SchemaFormColumnType,
   SchemaFormInstance,
   SchemaFormOptionType,
-  SchemaFormValuesType,
 } from "@/components/BetaSchemaForm/types"
 
 import styles from "./index.module.less"
 
 // 定义表单数据类型
-interface DemoFormValues extends SchemaFormValuesType {
+interface DemoFormValues {
   // 基础字段
   name: string
   age: number | undefined
@@ -32,7 +31,7 @@ interface DemoFormValues extends SchemaFormValuesType {
 
   // 日期字段
   birthday: string
-  workStartDate: string
+  workStartDate: string[]
 
   // 文件上传
   avatar: any[]
@@ -45,6 +44,8 @@ interface DemoFormValues extends SchemaFormValuesType {
   // 动态字段
   vipLevel?: string
   specialRequirement?: string
+  rate: number
+  slider: number
 }
 
 const SchemaFormDemo: React.FC = () => {
@@ -59,9 +60,9 @@ const SchemaFormDemo: React.FC = () => {
     validFields: 0,
   })
 
-  // 基础表单配置
-  const basicColumns: SchemaFormColumnType<DemoFormValues>[] = useMemo(
-    () => [
+  // 完整表单配置
+  const fullColumns = useMemo(
+    (): SchemaFormColumnType<DemoFormValues>[] => [
       {
         label: "姓名",
         name: "name",
@@ -117,13 +118,6 @@ const SchemaFormDemo: React.FC = () => {
           clearable: true,
         },
       },
-    ],
-    []
-  )
-
-  // 高级表单配置
-  const advancedColumns: SchemaFormColumnType<DemoFormValues>[] = useMemo(
-    () => [
       {
         label: "性别",
         name: "gender",
@@ -155,59 +149,6 @@ const SchemaFormDemo: React.FC = () => {
         },
       },
       {
-        label: "兴趣爱好",
-        name: "hobbies",
-        componentType: "checkbox",
-        componentProps: {
-          options: [
-            { label: "🎵 音乐", value: "music" },
-            { label: "⚽ 体育", value: "sports" },
-            { label: "📚 阅读", value: "reading" },
-            { label: "✈️ 旅游", value: "travel" },
-            { label: "🎮 游戏", value: "gaming" },
-            { label: "🍳 烹饪", value: "cooking" },
-          ],
-        },
-      },
-      {
-        label: "VIP用户",
-        name: "isVip",
-        componentType: "switch",
-        componentProps: {
-          checkedText: "是",
-          uncheckedText: "否",
-        },
-      },
-      {
-        label: "生日",
-        name: "birthday",
-        componentType: "date",
-        componentProps: {
-          placeholder: "请选择生日",
-        },
-      },
-      {
-        label: "工作开始时间",
-        name: "workStartDate",
-        componentType: "picker",
-        componentProps: {
-          columns: [
-            Array.from({ length: 10 }, (_, i) => ({
-              label: `${2015 + i}年`,
-              value: `${2015 + i}`,
-            })),
-          ],
-        },
-      },
-    ],
-    []
-  )
-
-  // 依赖字段演示
-  const dependencyColumns: SchemaFormColumnType<DemoFormValues>[] = useMemo(
-    () => [
-      ...advancedColumns,
-      {
         componentType: "dependency",
         to: ["city"],
         children(changedValues) {
@@ -233,10 +174,36 @@ const SchemaFormDemo: React.FC = () => {
         },
       },
       {
+        label: "兴趣爱好",
+        name: "hobbies",
+        componentType: "checkbox",
+        componentProps: {
+          options: [
+            { label: "🎵 音乐", value: "music" },
+            { label: "⚽ 体育", value: "sports" },
+            { label: "📚 阅读", value: "reading" },
+            { label: "✈️ 旅游", value: "travel" },
+            { label: "🎮 游戏", value: "gaming" },
+            { label: "🍳 烹饪", value: "cooking" },
+          ],
+        },
+      },
+      {
+        label: "VIP用户",
+        name: "isVip",
+        componentType: "switch",
+        componentProps: {
+          checkedText: "是",
+          uncheckedText: "否",
+        },
+      },
+
+      {
         componentType: "dependency",
         to: ["isVip"],
         children(changedValues) {
           const { isVip } = changedValues
+          console.log(changedValues, "changedValues")
           if (isVip) {
             return [
               {
@@ -268,15 +235,28 @@ const SchemaFormDemo: React.FC = () => {
           return []
         },
       },
-    ],
-    [advancedColumns]
-  )
+      {
+        label: "生日",
+        name: "birthday",
+        componentType: "date",
+        componentProps: {
+          placeholder: "请选择生日",
+        },
+      },
+      {
+        label: "工作开始时间",
+        name: "workStartDate",
+        componentType: "picker",
+        componentProps: {
+          columns: [
+            Array.from({ length: 10 }, (_, i) => ({
+              label: `${2015 + i}年`,
+              value: `${2015 + i}`,
+            })),
+          ],
+        },
+      },
 
-  // 完整表单配置
-  const fullColumns: SchemaFormColumnType<DemoFormValues>[] = useMemo(
-    () => [
-      ...basicColumns,
-      ...dependencyColumns,
       {
         label: "头像",
         name: "avatar",
@@ -308,8 +288,53 @@ const SchemaFormDemo: React.FC = () => {
           placeholder: "其他备注信息",
         },
       },
+      {
+        label: "评分",
+        name: "rate",
+        componentType: "rate",
+        componentProps: {
+          count: 5,
+        },
+      },
+      {
+        label: "滑块",
+        name: "slider",
+        componentType: "slider",
+        componentProps: {
+          min: 0,
+          max: 100,
+          step: 1,
+          readOnly: true,
+        },
+      },
     ],
-    [basicColumns, dependencyColumns]
+    []
+  )
+
+  // 基础表单配置
+  const basicColumns: SchemaFormColumnType<DemoFormValues>[] = useMemo(
+    () => fullColumns.filter((col) => ["text", "number"].includes(col.componentType)),
+    [fullColumns]
+  )
+
+  // 高级表单配置
+  const advancedColumns: SchemaFormColumnType<DemoFormValues>[] = useMemo(
+    () =>
+      fullColumns.filter((col) =>
+        ["radio", "select", "checkbox", "switch", "date", "picker"].includes(col.componentType)
+      ),
+    [fullColumns]
+  )
+
+  // 依赖字段演示
+  const dependencyColumns: SchemaFormColumnType<DemoFormValues>[] = useMemo(
+    () =>
+      fullColumns.filter((col) =>
+        ["radio", "select", "checkbox", "switch", "date", "picker", "dependency"].includes(
+          col.componentType
+        )
+      ),
+    [fullColumns]
   )
 
   // 获取当前选项卡的表单配置
@@ -473,7 +498,7 @@ const SchemaFormDemo: React.FC = () => {
 
   const handleClearValues = () => {
     formRef.current?.resetFields()
-    setFormValues({} as DemoFormValues)
+    // setFormValues({} as DemoFormValues)
     Toast.show("表单值已清空")
   }
 

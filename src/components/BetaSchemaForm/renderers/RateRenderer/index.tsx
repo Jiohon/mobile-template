@@ -1,4 +1,5 @@
 import { Rate } from "antd-mobile"
+import classNames from "classnames"
 
 import { ExpandRendererPropsType, SchemaFormValuesType } from "../../types"
 
@@ -20,6 +21,7 @@ const RateRenderer = <T extends SchemaFormValuesType>({
   value,
   onChange,
   disabled = false,
+  className,
   ...restProps
 }: RateRendererProps<T>) => {
   // 处理 onChange 事件，确保类型兼容
@@ -28,7 +30,10 @@ const RateRenderer = <T extends SchemaFormValuesType>({
   }
 
   return (
-    <div style={{ opacity: disabled ? 0.5 : 1, pointerEvents: disabled ? "none" : "auto" }}>
+    <div
+      className={classNames("schema-form-rate-renderer", className)}
+      style={{ opacity: disabled ? 0.5 : 1, pointerEvents: disabled ? "none" : "auto" }}
+    >
       <Rate value={value} onChange={handleChange} {...restProps} />
     </div>
   )

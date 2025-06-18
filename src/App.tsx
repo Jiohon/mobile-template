@@ -16,6 +16,7 @@ function App() {
     () => createDynamicRouter(userRolesSet, userPermissionsSet),
     [userRolesSet, userPermissionsSet]
   )
+
   return (
     <ConfigProvider locale={zhCN}>
       <RouterProvider router={router} />

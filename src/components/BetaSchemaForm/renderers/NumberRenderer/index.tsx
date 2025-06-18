@@ -1,6 +1,7 @@
 import React from "react"
 
 import { Input } from "antd-mobile"
+import classNames from "classnames"
 
 import { ExpandRendererPropsType, SchemaFormValuesType } from "../../types"
 
@@ -11,7 +12,8 @@ import "./index.less"
  * NumberRenderer组件的Props类型
  */
 export interface NumberRendererProps<T extends SchemaFormValuesType>
-  extends ExpandRendererPropsType<"number", InputProps, T> {
+  extends ExpandRendererPropsType<"number", Omit<InputProps, "value">, T> {
+  value?: number
   type?: "number" | "digit"
 }
 
@@ -22,18 +24,19 @@ export interface NumberRendererProps<T extends SchemaFormValuesType>
  */
 const NumberRenderer = <T extends SchemaFormValuesType>({
   value,
-  disabled,
   type = "number",
+  className,
   formItemProps,
+  formInstance,
   ...restProps
 }: NumberRendererProps<T>): React.ReactElement => {
   const placeholder = restProps?.placeholder || `请输入${formItemProps.label}`
 
   return (
     <Input
+      className={classNames("schema-form-number-renderer", className)}
       type={type}
       value={value?.toString() || ""}
-      disabled={disabled}
       placeholder={placeholder}
       {...restProps}
     />

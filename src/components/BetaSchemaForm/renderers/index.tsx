@@ -1,24 +1,28 @@
 // 导入独立渲染器组件
-import CheckboxRenderer from "./CheckboxRenderer"
-import CustomRenderer from "./CustomRenderer"
-import DateRenderer from "./DateRenderer"
-import NumberRenderer from "./NumberRenderer"
-import RadioRenderer from "./RadioRenderer"
-import RateRenderer from "./RateRenderer"
-import SelectRenderer from "./SelectRenderer"
-import SliderRenderer from "./SliderRenderer"
-import SwitchRenderer from "./SwitchRenderer"
-import TextRenderer from "./TextRenderer"
+export { default as CheckboxRenderer } from "./CheckboxRenderer"
+export { default as CustomRenderer } from "./CustomRenderer"
+export { default as DateRenderer } from "./DateRenderer"
+export { default as NumberRenderer } from "./NumberRenderer"
+export { default as PickerRenderer } from "./PickerRenderer"
+export { default as RadioRenderer } from "./RadioRenderer"
+export { default as RateRenderer } from "./RateRenderer"
+export { default as SelectRenderer } from "./SelectRenderer"
+export { default as SliderRenderer } from "./SliderRenderer"
+export { default as SwitchRenderer } from "./SwitchRenderer"
+export { default as TextAreaRenderer } from "./TextAreaRenderer"
+export { default as TextRenderer } from "./TextRenderer"
+export { default as UploadRenderer } from "./UploadRenderer"
 
-export {
-  TextRenderer,
-  NumberRenderer,
-  SwitchRenderer,
-  SelectRenderer,
-  RadioRenderer,
-  CheckboxRenderer,
-  DateRenderer,
-  RateRenderer,
-  SliderRenderer,
-  CustomRenderer,
-}
+export type * from "./CheckboxRenderer"
+export type * from "./CustomRenderer"
+export type * from "./DateRenderer"
+export type * from "./NumberRenderer"
+export type * from "./PickerRenderer"
+export type * from "./RadioRenderer"
+export type * from "./RateRenderer"
+export type * from "./SelectRenderer"
+export type * from "./SliderRenderer"
+export type * from "./SwitchRenderer"
+export type * from "./TextAreaRenderer"
+export type * from "./TextRenderer"
+export type * from "./UploadRenderer"

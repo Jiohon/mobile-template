@@ -1,6 +1,6 @@
 import React from "react"
 
-import { omit } from "lodash"
+import { omit } from "lodash-es"
 
 import {
   ExtractRendererCompPropsType,

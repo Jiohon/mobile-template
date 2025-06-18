@@ -1,4 +1,5 @@
 import { Switch } from "antd-mobile"
+import classNames from "classnames"
 
 import { ExpandRendererPropsType, SchemaFormValuesType } from "../../types"
 
@@ -18,12 +19,19 @@ export interface SwitchRendererProps<T extends SchemaFormValuesType>
  * 支持自定义开关状态文本
  */
 const SwitchRenderer = <T extends SchemaFormValuesType>({
-  disabled,
+  value,
+  className,
   formItemProps,
+  formInstance,
   ...restProps
 }: SwitchRendererProps<T>) => {
-  // Form.Item 会自动传递 value 和 onChange，无需手动处理
-  return <Switch disabled={disabled} className="schema-form-switch-renderer" {...restProps} />
+  return (
+    <Switch
+      checked={value}
+      className={classNames("schema-form-switch-renderer", className)}
+      {...restProps}
+    />
+  )
 }
 
 export default SwitchRenderer

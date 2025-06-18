@@ -8,7 +8,7 @@ import type { RouteObject } from "react-router"
  * 2. 第 2 位（操作）：操作行为（如 create, edit, delete, view）
  * 3. 第 3 位（资源）：具体资源或数据粒度（如某个 ID、类型、菜单等）
  *
- * 修改这里的格式 需同步修改 @/hooks/useAccess/auth.ts 中的 hasPermission 函数判断
+ * @note 修改这里的格式 需同步修改 access/auth.ts 中的 hasPermission 函数判断
  *
  * @example
  * "user:read:*" 表示：用户模块的读取权限，且可以访问所有用户

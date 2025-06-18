@@ -1,16 +1,11 @@
 import { Input, Picker } from "antd-mobile"
+import classNames from "classnames"
 
 import type { ExpandRendererPropsType, SchemaFormValuesType } from "../../types"
 import type { PickerProps } from "antd-mobile"
 import type { PickerValue, PickerValueExtend } from "antd-mobile/es/components/picker"
-import type { Dayjs } from "dayjs"
 
 import "./index.less"
-
-type Generic = string
-type GenericFn = (value: Dayjs) => string
-
-export type FormatType = Generic | GenericFn
 
 /**
  * DateRenderer组件的Props类型
@@ -18,8 +13,8 @@ export type FormatType = Generic | GenericFn
 export interface PickerRendererProps<T extends SchemaFormValuesType>
   extends ExpandRendererPropsType<"picker", PickerProps, T> {
   disabled?: boolean
+  readOnly?: boolean
   placeholder?: string
-  format?: FormatType
   onChange?: ((value: PickerValue[], extend: PickerValueExtend) => void) | undefined
 }
 
@@ -31,7 +26,11 @@ const PickerRenderer = <T extends SchemaFormValuesType>({
   value,
   onConfirm,
   disabled,
+  readOnly,
+  className,
+  popupClassName,
   formItemProps,
+  formInstance,
   ...restProps
 }: PickerRendererProps<T>) => {
   const placeholder = restProps?.placeholder || `请选择${formItemProps.label}`
@@ -41,22 +40,29 @@ const PickerRenderer = <T extends SchemaFormValuesType>({
     restProps?.onChange?.(value, extend)
   }
 
-  const handleCancel = () => {}
+  const handleClick = (open: () => void) => {
+    if (readOnly || disabled) return
+    open()
+  }
 
   return (
     <Picker
       value={value}
       onConfirm={handleConfirm}
-      onCancel={handleCancel}
       title={restProps?.title ?? placeholder}
+      popupClassName={classNames("schema-form-picker-popup-renderer", popupClassName)}
       {...restProps}
     >
       {(items, { open }) => {
         return (
-          <div onClick={open}>
+          <div
+            className={classNames("schema-form-picker-renderer", className)}
+            onClick={() => handleClick(open)}
+          >
             <Input
               placeholder={placeholder}
               readOnly
+              disabled={disabled}
               value={
                 items.every((item) => item === null)
                   ? ""
