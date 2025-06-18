@@ -21,7 +21,7 @@ export interface UploadConfig {
 }
 
 // Alova 响应拦截器返回类型
-export interface AlovaResponse<T = any> {
+export interface AlovaResponse<T = unknown> {
   status: number
   statusText: string
   data: T

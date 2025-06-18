@@ -1,18 +1,18 @@
-import { get, post, put } from "@/request"
+import alova from "@/request"
 import { LoginRequest, LoginResponse, User } from "@/types/auth"
 
 /**
  * 用户登录
  */
-export const loginApi = async (data: LoginRequest): Promise<LoginResponse> => {
-  return await post("/auth/login", data)
+export const loginApi = async (data: LoginRequest) => {
+  return await alova.Post<LoginResponse>("/auth/login", data)
 }
 
 /**
  * 刷新Token
  */
-export const refreshTokenApi = async (refreshToken: string): Promise<LoginResponse> => {
-  return await post("/auth/refresh", {
+export const refreshTokenApi = async (refreshToken: string) => {
+  return await alova.Post<LoginResponse>("/auth/refresh", {
     refresh_token: refreshToken,
   })
 }
@@ -20,30 +20,27 @@ export const refreshTokenApi = async (refreshToken: string): Promise<LoginRespon
 /**
  * 用户登出
  */
-export const logoutApi = async (): Promise<void> => {
-  await post("/auth/logout")
+export const logoutApi = async () => {
+  await alova.Post("/auth/logout")
 }
 
 /**
  * 获取当前用户信息
  */
-export const getCurrentUserApi = async (): Promise<User> => {
-  return await get("/auth/me")
+export const getCurrentUserApi = async () => {
+  return await alova.Get<User>("/auth/me")
 }
 
 /**
  * 更新用户信息
  */
-export const updateUserApi = async (data: Partial<User>): Promise<User> => {
-  return await put("/auth/user", data)
+export const updateUserApi = async (data: Partial<User>) => {
+  return await alova.Put<User>("/auth/user", data)
 }
 
 /**
  * 修改密码
  */
-export const changePasswordApi = async (data: {
-  oldPassword: string
-  newPassword: string
-}): Promise<void> => {
-  await post("/auth/change-password", data)
+export const changePasswordApi = async (data: { oldPassword: string; newPassword: string }) => {
+  await alova.Post("/auth/change-password", data)
 }

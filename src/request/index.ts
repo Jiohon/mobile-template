@@ -1,8 +1,9 @@
 import { createAlova } from "alova"
 import adapterFetch from "alova/fetch"
 
+import { env } from "@/config"
+
 import { createAuthHandler } from "./auth"
-import { getEnvConfig } from "./config"
 import { beforeRequestHandler, responseHandler } from "./interceptors"
 
 // 创建认证处理器
@@ -11,8 +12,8 @@ const { onAuthRequired, onResponseRefreshToken } = createAuthHandler()
 // 创建 alova 实例
 const alova = createAlova({
   // 基础配置
-  baseURL: getEnvConfig().baseURL,
-  timeout: 10000,
+  baseURL: env.API_BASE_URL,
+  timeout: env.API_TIMEOUT,
 
   // 使用 fetch 适配器
   requestAdapter: adapterFetch(),
@@ -26,11 +27,5 @@ const alova = createAlova({
 
 export default alova
 
-// 导出请求方法
-export { get, post, put, del, patch } from "./methods"
-
-// 导出认证工具
-export { tokenUtils } from "./auth"
-
 // 导出类型
-export type { RequestError, RequestConfig } from "./types"
+export type * from "./types"

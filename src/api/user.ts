@@ -1,4 +1,4 @@
-import { del, get, post, put } from "@/request"
+import alova from "@/request"
 import { User } from "@/types/auth"
 import { PageResponse } from "@/types/common"
 
@@ -9,43 +9,41 @@ export const getUserListApi = async (params: {
   current: number
   pageSize: number
   keyword?: string
-}): Promise<PageResponse<User[]>> => {
-  return await get("/users", { params })
+}) => {
+  return await alova.Get<PageResponse<User[]>>("/users", { params })
 }
 
 /**
  * 获取用户详情
  */
-export const getUserDetailApi = async (id: string): Promise<User> => {
-  return await get(`/users/${id}`)
+export const getUserDetailApi = async (id: string) => {
+  return await alova.Get<User>(`/users/${id}`)
 }
 
 /**
  * 创建用户
  */
-export const createUserApi = async (
-  data: Omit<User, "id" | "createTime" | "updateTime">
-): Promise<User> => {
-  return await post("/users", data)
+export const createUserApi = async (data: Omit<User, "id" | "createTime" | "updateTime">) => {
+  return await alova.Post<User>("/users", data)
 }
 
 /**
  * 更新用户
  */
-export const updateUserInfoApi = async (id: string, data: Partial<User>): Promise<User> => {
-  return await put(`/users/${id}`, data)
+export const updateUserInfoApi = async (id: string, data: Partial<User>) => {
+  return await alova.Put<User>(`/users/${id}`, data)
 }
 
 /**
  * 删除用户
  */
-export const deleteUserApi = async (id: string): Promise<void> => {
-  await del(`/users/${id}`)
+export const deleteUserApi = async (id: string) => {
+  await alova.Delete(`/users/${id}`)
 }
 
 /**
  * 批量删除用户
  */
-export const batchDeleteUsersApi = async (ids: string[]): Promise<void> => {
-  await del("/users/batch", { data: { ids } })
+export const batchDeleteUsersApi = async (ids: string[]) => {
+  await alova.Delete("/users/batch", { data: { ids } })
 }

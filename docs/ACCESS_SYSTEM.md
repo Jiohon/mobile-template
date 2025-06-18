@@ -5,71 +5,126 @@
 ## 📁 文件结构
 
 ```
-src/
-├── access.ts                    # 权限定义文件
-├── hooks/
-│   └── useAccess.ts            # useAccess Hook
-├── components/
-│   └── Access/                 # Access 组件
-│       └── index.tsx
-├── types/
-│   └── access.ts               # 权限系统类型定义
-├── utils/
-│   └── access.ts               # 权限工具函数统一导出
-└── pages/
-    └── AccessDemo/             # 权限系统演示页面
-        └── index.tsx
+src/access/
+├── auth.ts                     # 权限认证核心逻辑
+├── types.ts                    # 权限系统类型定义
+├── index.ts                    # 统一导出权限相关工具和组件
+├── useAccess/                  # useAccess Hook 目录
+│   ├── useAccess.ts           # useAccess Hook 实现
+│   └── createAccess.ts        # createAccess 工厂函数
+└── Access/                     # Access 权限组件目录
+    └── index.tsx              # Access 组件实现
 ```
 
 ## 🚀 核心功能
 
-### 1. 权限定义 (`src/access.ts`)
+### 1. 权限系统架构 (`src/access/`)
 
-类似于 UmiJS 的约定，我们在 `src/access.ts` 中定义所有权限逻辑：
+权限系统采用模块化设计，主要包含以下核心文件：
+
+#### `src/access/types.ts` - 权限类型定义
 
 ```typescript
-export default function access(initialState: { user: User | null }) {
-  const { user } = initialState
+export interface AccessType {
+  // 认证相关权限
+  isAuthenticated: boolean
+
+  // 角色权限判断
+  isAdmin: boolean
+  isUser: boolean
+
+  // CRUD 权限检查方法
+  canRead: (permission: PermissionsType) => boolean
+  canCreate: (permission: PermissionsType) => boolean
+  canUpdate: (permission: PermissionsType) => boolean
+  canDelete: (permission: PermissionsType) => boolean
+
+  // 权限检查函数
+  hasPermission: (permission: PermissionsType) => boolean
+  hasRole: (role: string) => boolean
+  hasAnyRole: (roles: string[]) => boolean
+  hasAnyPermission: (permissions: PermissionsType[]) => boolean
+}
+```
+
+#### `src/access/auth.ts` - 权限认证核心逻辑
+
+```typescript
+/**
+ * 检查用户是否拥有指定权限
+ * 支持通配符权限匹配：resource:action:scope
+ */
+export const hasPermission = (
+  userPermissionsSet: Set<PermissionsType>,
+  permission?: PermissionsType | null
+) => {
+  if (!userPermissionsSet?.size) return false
+  if (!permission) return true
+
+  // 检查超级管理员权限
+  if (userPermissionsSet.has("*:*:*")) return true
+
+  // 检查精确权限
+  if (userPermissionsSet.has(permission)) return true
+
+  // 检查通配符权限
+  const [resource, action, scope = "*"] = permission.split(":")
+  const candidates = [
+    `${resource}:${action}:*`,
+    `${resource}:*:${scope}`,
+    `*:${action}:${scope}`,
+    `${resource}:*:*`,
+    `*:${action}:*`,
+    `*:*:${scope}`,
+  ] as PermissionsType[]
+
+  return candidates.some((c) => userPermissionsSet.has(c))
+}
+```
+
+#### `src/access/useAccess/createAccess.ts` - 权限工厂函数
+
+```typescript
+const createAccess: AccessConfigFunction = (initialState): UseAccessReturnType => {
+  const user = initialState.user ?? useAuthStore.getState().user
+  const userRolesSet = initialState.userRolesSet ?? useAuthStore.getState().userRolesSet
+  const userPermissionsSet =
+    initialState.userPermissionsSet ?? useAuthStore.getState().userPermissionsSet
 
   return {
-    // 基础权限
+    // 认证相关权限
     isAuthenticated: !!user,
-    isAdmin: user?.roles?.includes("admin") ?? false,
 
-    // 页面权限
-    canReadHome: !!user,
-    canAccessAdmin: user?.roles?.includes("admin") ?? false,
+    // 角色权限判断
+    isAdmin: userRolesSet.has("admin") ?? false,
+    isUser: userRolesSet.has("user") ?? false,
 
-    // 动态权限函数
-    canEditUser: (targetUserId: string) => {
-      if (!user) return false
-      if (user.roles?.includes("admin")) return true
-      return user.id === targetUserId
-    },
+    // CRUD 权限检查
+    canRead: (permission) => hasPermission(userPermissionsSet, permission),
+    canCreate: (permission) => hasPermission(userPermissionsSet, permission),
+    canUpdate: (permission) => hasPermission(userPermissionsSet, permission),
+    canDelete: (permission) => hasPermission(userPermissionsSet, permission),
 
     // 权限检查函数
-    hasPermission: (permission: string) => {
-      return user?.permissions?.includes(permission) ?? false
-    },
-
-    hasRole: (role: string) => {
-      return user?.roles?.includes(role) ?? false
-    },
+    hasRole: (role) => hasRole(userRolesSet, role),
+    hasPermission: (permission) => hasPermission(userPermissionsSet, permission),
+    hasAnyRole: (roles) => hasAnyRole(userRolesSet, roles),
+    hasAnyPermission: (permissions) => hasAnyPermission(userPermissionsSet, permissions),
   }
 }
 ```
 
-### 2. useAccess Hook
+### 2. useAccess Hook (`src/access/useAccess/useAccess.ts`)
 
 在组件中使用 `useAccess` 获取权限信息：
 
 ```typescript
-import { useAccess } from "@/utils/access"
+import { useAccess } from "@/access"
 
 const MyComponent: React.FC = () => {
   const access = useAccess()
 
-  // 直接使用权限判断
+  // 角色权限判断
   if (access.isAdmin) {
     // 管理员逻辑
   }
@@ -79,19 +134,44 @@ const MyComponent: React.FC = () => {
     // 版主逻辑
   }
 
-  // 使用动态权限
-  const canEdit = access.canEditUser("user-123")
+  // 使用 CRUD 权限检查
+  const canReadUser = access.canRead("user:read:*")
+  const canCreatePost = access.canCreate("post:create:*")
+
+  // 使用通配符权限
+  const hasUserPermissions = access.hasPermission("user:*:*")
+
+  // 批量权限检查
+  const hasAnyRole = access.hasAnyRole(["admin", "moderator"])
+  const hasAllPermissions = access.hasAnyPermission([
+    "user:read:*",
+    "post:create:*"
+  ])
 
   return <div>...</div>
 }
 ```
 
-### 3. Access 组件
+#### useAccess Hook 实现原理
+
+```typescript
+export const useAccess = (): UseAccessReturnType => {
+  const { user, userRolesSet, userPermissionsSet } = useAuthStore()
+
+  const accessPermissions = useMemo(() => {
+    return createAccess({ user, userRolesSet, userPermissionsSet })
+  }, [user, userRolesSet, userPermissionsSet])
+
+  return accessPermissions
+}
+```
+
+### 3. Access 组件 (`src/access/Access/index.tsx`)
 
 用于条件渲染组件：
 
 ```typescript
-import { Access, useAccess } from "@/utils/access"
+import { Access, useAccess } from "@/access"
 
 const MyComponent: React.FC = () => {
   const access = useAccess()
@@ -107,19 +187,60 @@ const MyComponent: React.FC = () => {
       </Access>
 
       {/* 无 fallback，无权限时不显示任何内容 */}
-      <Access accessible={access.canManageUsers}>
+      <Access accessible={access.canRead("user:read:*")}>
         <button>用户管理</button>
       </Access>
 
-      {/* 动态权限判断 */}
+      {/* CRUD 权限控制 */}
       <Access
-        accessible={access.canEditUser("user-123")}
-        fallback={<button disabled>编辑用户（无权限）</button>}
+        accessible={access.canCreate("post:create:*")}
+        fallback={<button disabled>创建文章（无权限）</button>}
       >
-        <button>编辑用户</button>
+        <button>创建文章</button>
+      </Access>
+
+      {/* 通配符权限判断 */}
+      <Access accessible={access.hasPermission("user:*:*")}>
+        <div>用户管理模块</div>
       </Access>
     </div>
   )
+}
+```
+
+#### Access 组件接口定义
+
+```typescript
+export interface AccessProps {
+  /**
+   * 是否有权限访问
+   */
+  accessible: boolean
+  /**
+   * 无权限时显示的内容
+   */
+  fallback?: ReactNode
+  /**
+   * 有权限时显示的内容
+   */
+  children: ReactNode
+}
+```
+
+#### Access 组件实现
+
+```typescript
+const Access: React.FC<AccessProps> = ({ accessible, fallback, children }) => {
+  if (accessible) {
+    return <>{children}</>
+  }
+
+  if (fallback !== undefined) {
+    return <>{fallback}</>
+  }
+
+  // 无权限且没有指定 fallback 时，不渲染任何内容
+  return null
 }
 ```
 
