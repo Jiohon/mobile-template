@@ -1,5 +1,6 @@
 import { createBrowserRouter } from "react-router"
 
+import { env } from "@/config"
 import { PermissionsType } from "@/types/router"
 
 import { generateLayoutRoutes } from "./generator"
@@ -14,8 +15,10 @@ export const createDynamicRouter = (
 ) => {
   // 根据用户权限生成路由
   const dynamicRoutes = generateLayoutRoutes(routes, userRolesSet, userPermissionsSet)
-
-  const router = createBrowserRouter(dynamicRoutes)
+  console.log("createDynamicRouter", env.APP_BASE_PATH)
+  const router = createBrowserRouter(dynamicRoutes, {
+    basename: env.APP_BASE_PATH,
+  })
 
   return router
 }

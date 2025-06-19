@@ -1,5 +1,3 @@
-import { viteMockServe } from "vite-plugin-mock"
-
 import type { UserConfig } from "vite"
 
 /**
@@ -11,27 +9,19 @@ export const createDevConfig = (env: Record<string, string>): UserConfig => {
   const proxyTarget = env.VITE_PROXY_TARGET || "http://localhost:3001"
   const proxyPathRewrite = env.VITE_PROXY_PATH_REWRITE || "^/api"
 
-  // 是否启用mock（当没有后端服务时启用）
-  const enableMock = env.VITE_ENABLE_MOCK !== "false"
+  // 是否启用MSW（当没有后端服务时启用）
+  const enableMSW = env.VITE_ENABLE_MSW === "true"
 
   return {
-    plugins: [
-      // Mock插件配置
-      viteMockServe({
-        mockPath: "mock",
-        enable: enableMock,
-        watchFiles: true,
-        logger: true,
-      }),
-    ],
+    plugins: [],
     server: {
       host: "0.0.0.0",
       port: 3000,
       open: true,
-      proxy: enableMock
+      proxy: enableMSW
         ? undefined
         : {
-            // 只有在禁用mock时才启用代理
+            // 只有在禁用MSW时才启用代理
             [proxyPath]: {
               target: proxyTarget,
               changeOrigin: true,

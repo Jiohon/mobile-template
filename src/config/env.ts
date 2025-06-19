@@ -1,35 +1,12 @@
-/**
- * 环境变量类型定义
- */
-export interface EnvConfig {
-  // 应用信息
-  APP_TITLE: string
-  APP_VERSION: string
-  APP_DESCRIPTION: string
-  APP_ENV: "development" | "staging" | "production"
-
-  // API 配置
-  API_BASE_URL: string
-  API_TIMEOUT: number
-
-  // 反向代理配置
-  PROXY_PATH: string
-  PROXY_TARGET: string
-  PROXY_PATH_REWRITE: string
-
-  // 认证配置
-  TOKEN_KEY: string
-  REFRESH_TOKEN_KEY: string
-  TOKEN_EXPIRES_IN: number
-}
+import type { ImportMetaEnv } from "../types/environment"
 
 /**
  * 获取环境变量值
  */
-const getEnvValue = (key: string, defaultValue = undefined) => {
+const getEnvValue = (key: keyof ImportMetaEnv, defaultValue = undefined) => {
   const envKey = `VITE_${key}`
   const env = import.meta.env
-  const value = env?.[envKey]
+  const value = env?.[envKey] || env?.[key]
 
   if (value === undefined || value === "") {
     return defaultValue
@@ -53,13 +30,21 @@ const getEnvValue = (key: string, defaultValue = undefined) => {
 /**
  * 解析环境变量配置
  */
-const parseEnvConfig = (): EnvConfig => {
+const parseEnvConfig = (): ImportMetaEnv => {
   return {
+    MODE: getEnvValue("MODE"),
+    BASE_URL: getEnvValue("BASE_URL"),
+    PROD: getEnvValue("PROD"),
+    DEV: getEnvValue("DEV"),
+    SSR: getEnvValue("SSR"),
+
     // 应用信息
     APP_TITLE: getEnvValue("APP_TITLE"),
     APP_VERSION: getEnvValue("APP_VERSION"),
     APP_DESCRIPTION: getEnvValue("APP_DESCRIPTION"),
-    APP_ENV: getEnvValue("APP_ENV"),
+
+    // 应用基础路径
+    APP_BASE_PATH: getEnvValue("APP_BASE_PATH"),
 
     // API 配置
     API_BASE_URL: getEnvValue("API_BASE_URL"),
@@ -85,21 +70,21 @@ export const env = parseEnvConfig()
 /**
  * 是否为开发环境
  */
-export const isDev = env.APP_ENV === "development"
+export const isDev = env.MODE === "development"
 
 /**
  * 是否为生产环境
  */
-export const isProd = env.APP_ENV === "production"
+export const isProd = env.MODE === "production"
 
 /**
  * 是否为预发布环境
  */
-export const isStaging = env.APP_ENV === "staging"
+export const isStaging = env.MODE === "staging"
 
 /**
  * 开发环境初始化（如需要可在此处添加开发专用逻辑）
  */
 if (isDev) {
-  console.log("🔧 环境配置已加载:", env)
+  console.log("�� 环境配置已加载:", env)
 }

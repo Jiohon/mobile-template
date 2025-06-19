@@ -26,13 +26,6 @@ export const createProdConfig = (_env: Record<string, string>): UserConfig => {
               return null
             }
 
-            // React 核心生态
-            if (
-              ["react", "react-dom", "react-router"].some((lib) => new RegExp(`/${lib}/`).test(id))
-            ) {
-              return "vendor-react"
-            }
-
             // UI 组件库
             if (
               ["antd-mobile", "antd-mobile-icons"].some((lib) => new RegExp(`/${lib}/`).test(id))
@@ -40,23 +33,28 @@ export const createProdConfig = (_env: Record<string, string>): UserConfig => {
               return "vendor-antd"
             }
 
-            // 国际化相关
-            if (["i18next", "react-i18next"].some((lib) => new RegExp(`/${lib}/`).test(id))) {
+            // 国际化相关 - 仅保留纯国际化库
+            if (["react-i18next", "i18next"].some((lib) => new RegExp(`/${lib}/`).test(id))) {
               return "vendor-i18n"
             }
 
-            // 状态管理和HTTP
-            if (["zustand", "alova"].some((lib) => new RegExp(`/${lib}/`).test(id))) {
-              return "vendor-state"
-            }
-
-            // 轻量级工具库
+            // 工具库
             if (
-              ["lodash-es", "dayjs", "classnames", "rc-field-form", "ryt-jssdk"].some((lib) =>
+              ["zustand", "alova", "lodash-es", "dayjs", "classnames", "ryt-jssdk"].some((lib) =>
                 new RegExp(`/${lib}/`).test(id)
               )
             ) {
               return "vendor-utils"
+            }
+
+            // React 核心生态 - 包含所有依赖 React 的库（包括间接依赖）
+            if (["react", "react-dom"].some((lib) => new RegExp(`/${lib}/`).test(id))) {
+              console.log("vendor-react-core", id)
+              return "vendor-react-core"
+            }
+
+            if (["react"].some((lib) => id.includes(lib))) {
+              return "vendor-react-other"
             }
 
             // 其他未分类的第三方依赖
@@ -67,7 +65,7 @@ export const createProdConfig = (_env: Record<string, string>): UserConfig => {
       // 启用 gzip 压缩
       reportCompressedSize: true,
       // 设置 chunk 大小警告限制
-      chunkSizeWarningLimit: 250,
+      chunkSizeWarningLimit: 200,
     },
     define: {
       __DEV__: false,
