@@ -18,7 +18,6 @@ import type {
 import type { FormProps as AntdMobileFormProps, ButtonProps, SelectorOption } from "antd-mobile"
 import type { FormInstance as AntdMobileFormInstance } from "antd-mobile/es/components/form"
 import type { FormItemProps as AntdMobileFormItemProps } from "antd-mobile/es/components/form/form-item"
-import type { ValidateErrorEntity } from "rc-field-form/es/interface"
 
 // ==================== 基础类型定义 ====================
 /**
@@ -173,8 +172,14 @@ export type SchemaFormColumnType<TValues extends SchemaFormValuesType> =
  * 表单验证错误信息类型
  * @template TValues - 表单数据类型
  */
-export type SchemaFormErrorInfoType<TValues extends SchemaFormValuesType> =
-  ValidateErrorEntity<TValues>
+export type SchemaFormErrorInfoType<TValues extends SchemaFormValuesType> = {
+  values: TValues
+  errorFields: {
+    name: (string | number)[]
+    errors: string[]
+  }[]
+  outOfDate: boolean
+}
 
 /**
  * SchemaForm 组件属性类型

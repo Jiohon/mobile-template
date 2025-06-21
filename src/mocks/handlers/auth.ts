@@ -49,36 +49,39 @@ const generateRefreshToken = () => generateRandomString("lower", 32)
 
 export const authHandlers = [
   // 用户登录
-  http.post("/api/auth/login", async ({ request }) => {
+  http.post("http://localhost:3000/api/auth/login", async ({ request }) => {
     const body = (await request.json()) as { username: string; password: string }
     const { username, password } = body
 
     // 简单验证
     if (!username || !password) {
-      return HttpResponse.json({
+      const response = {
         code: 400,
         message: "用户名和密码不能为空",
         data: null,
-      })
+      }
+      return HttpResponse.json(response)
     }
 
     // 查找用户
     const user = mockUsers.find((u) => u.username === username)
     if (!user) {
-      return HttpResponse.json({
+      const response = {
         code: 401,
         message: "用户名或密码错误",
         data: null,
-      })
+      }
+      return HttpResponse.json(response)
     }
 
     // 验证密码（这里简化处理，实际项目中应该加密比较）
     if (password !== "123456") {
-      return HttpResponse.json({
+      const response = {
         code: 401,
         message: "用户名或密码错误",
         data: null,
-      })
+      }
+      return HttpResponse.json(response)
     }
 
     // 生成token
@@ -89,7 +92,7 @@ export const authHandlers = [
     currentToken = token
     currentUser = user
 
-    return HttpResponse.json({
+    const response = {
       code: 200,
       message: "登录成功",
       data: {
@@ -97,29 +100,33 @@ export const authHandlers = [
         refreshToken,
         user,
       },
-    })
+    }
+
+    return HttpResponse.json(response)
   }),
 
   // 刷新Token
-  http.post("/api/auth/refresh", async ({ request }) => {
+  http.post("http://localhost:3000/api/auth/refresh", async ({ request }) => {
     const body = (await request.json()) as { refresh_token: string }
     const { refresh_token } = body
 
     if (!refresh_token) {
-      return HttpResponse.json({
+      const response = {
         code: 400,
         message: "refresh_token不能为空",
         data: null,
-      })
+      }
+      return HttpResponse.json(response)
     }
 
     // 简单验证refresh_token有效性
     if (!currentUser) {
-      return HttpResponse.json({
+      const response = {
         code: 401,
         message: "refresh_token无效",
         data: null,
-      })
+      }
+      return HttpResponse.json(response)
     }
 
     // 生成新的token
@@ -127,7 +134,7 @@ export const authHandlers = [
     const refreshToken = generateRefreshToken()
     currentToken = token
 
-    return HttpResponse.json({
+    const response = {
       code: 200,
       message: "刷新成功",
       data: {
@@ -135,58 +142,66 @@ export const authHandlers = [
         refreshToken,
         user: currentUser,
       },
-    })
+    }
+
+    return HttpResponse.json(response)
   }),
 
   // 用户登出
-  http.post("/api/auth/logout", () => {
+  http.post("http://localhost:3000/api/auth/logout", () => {
     // 清除登录状态
     currentToken = null
     currentUser = null
 
-    return HttpResponse.json({
+    const response = {
       code: 200,
       message: "登出成功",
       data: null,
-    })
+    }
+
+    return HttpResponse.json(response)
   }),
 
   // 获取当前用户信息
-  http.get("/api/auth/me", ({ request }) => {
+  http.get("http://localhost:3000/api/auth/me", ({ request }) => {
     const authorization =
       request.headers.get("authorization") || request.headers.get("Authorization")
     const token = authorization?.replace("Bearer ", "")
 
     if (!token || token !== currentToken || !currentUser) {
-      return HttpResponse.json({
+      const response = {
         code: 401,
         message: "未登录或token已过期",
         data: null,
-      })
+      }
+      return HttpResponse.json(response)
     }
 
-    return HttpResponse.json({
+    const response = {
       code: 200,
       message: "获取用户信息成功",
       data: currentUser,
-    })
+    }
+
+    return HttpResponse.json(response)
   }),
 
   // 更新用户信息
-  http.put("/api/auth/user", async ({ request }) => {
+  http.put("http://localhost:3000/api/auth/user", async ({ request }) => {
     const authorization =
       request.headers.get("authorization") || request.headers.get("Authorization")
     const token = authorization?.replace("Bearer ", "")
 
+    const body = (await request.json()) as Record<string, any>
+
     if (!token || token !== currentToken || !currentUser) {
-      return HttpResponse.json({
+      const response = {
         code: 401,
         message: "未登录或token已过期",
         data: null,
-      })
+      }
+      return HttpResponse.json(response)
     }
-
-    const body = (await request.json()) as Record<string, any>
 
     // 更新用户信息
     const updatedUser = {
@@ -204,59 +219,67 @@ export const authHandlers = [
       mockUsers[userIndex] = updatedUser
     }
 
-    return HttpResponse.json({
+    const response = {
       code: 200,
       message: "更新用户信息成功",
       data: updatedUser,
-    })
+    }
+
+    return HttpResponse.json(response)
   }),
 
   // 修改密码
-  http.post("/api/auth/change-password", async ({ request }) => {
+  http.post("http://localhost:3000/api/auth/change-password", async ({ request }) => {
     const authorization =
       request.headers.get("authorization") || request.headers.get("Authorization")
     const token = authorization?.replace("Bearer ", "")
 
-    if (!token || token !== currentToken || !currentUser) {
-      return HttpResponse.json({
-        code: 401,
-        message: "未登录或token已过期",
-        data: null,
-      })
-    }
-
     const body = (await request.json()) as { oldPassword: string; newPassword: string }
     const { oldPassword, newPassword } = body
 
+    if (!token || token !== currentToken || !currentUser) {
+      const response = {
+        code: 401,
+        message: "未登录或token已过期",
+        data: null,
+      }
+      return HttpResponse.json(response)
+    }
+
     if (!oldPassword || !newPassword) {
-      return HttpResponse.json({
+      const response = {
         code: 400,
         message: "旧密码和新密码不能为空",
         data: null,
-      })
+      }
+      return HttpResponse.json(response)
     }
 
     // 验证旧密码（这里简化处理）
     if (oldPassword !== "123456") {
-      return HttpResponse.json({
+      const response = {
         code: 400,
         message: "旧密码错误",
         data: null,
-      })
+      }
+      return HttpResponse.json(response)
     }
 
     if (newPassword.length < 6) {
-      return HttpResponse.json({
+      const response = {
         code: 400,
         message: "新密码长度不能少于6位",
         data: null,
-      })
+      }
+      return HttpResponse.json(response)
     }
 
-    return HttpResponse.json({
+    const response = {
       code: 200,
       message: "密码修改成功",
       data: null,
-    })
+    }
+
+    return HttpResponse.json(response)
   }),
 ]

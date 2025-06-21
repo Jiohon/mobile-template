@@ -218,7 +218,6 @@ VITE_PROXY_PATH=/api
 
 # 应用配置
 VITE_APP_TITLE=移动端应用
-VITE_APP_VERSION=1.0.0
 ```
 
 ## 🤝 贡献指南

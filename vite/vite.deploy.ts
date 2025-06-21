@@ -6,9 +6,9 @@ import type { AppEnvConfig } from "../src/types/environment"
 import type { UserConfig } from "vite"
 
 /**
- * 预发布环境 Vite 配置
+ * 部署(deploy)环境 Vite 配置
  */
-export const createStagingConfig = (env: AppEnvConfig): Omit<UserConfig, "server"> => {
+export const createDeployConfig = (env: AppEnvConfig): Omit<UserConfig, "server"> => {
   return mergeConfig(createBuildCommonConfig(env), {
     build: {
       sourcemap: env.VITE_SOURCEMAP_ENABLE,

@@ -12,8 +12,8 @@ const { onAuthRequired, onResponseRefreshToken } = createAuthHandler()
 // 创建 alova 实例
 const alova = createAlova({
   // 基础配置
-  baseURL: env.API_BASE_URL,
-  timeout: env.API_TIMEOUT,
+  baseURL: env.VITE_API_BASE_URL,
+  timeout: env.VITE_API_TIMEOUT,
 
   // 使用 fetch 适配器
   requestAdapter: adapterFetch(),

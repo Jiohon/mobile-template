@@ -22,8 +22,8 @@ function App() {
   return (
     <>
       <Helmet>
-        <title>{env.APP_TITLE}</title>
-        <meta name="description" content={env.APP_DESCRIPTION} />
+        <title>{env.VITE_APP_TITLE}</title>
+        <meta name="description" content={env.VITE_APP_DESCRIPTION} />
       </Helmet>
 
       <ConfigProvider locale={zhCN}>

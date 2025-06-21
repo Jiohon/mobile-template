@@ -81,11 +81,8 @@ build/Release
 # ===================================
 
 # Environment variables
-.env
 .env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*.local
 
 # 私有文件
 *local.sh
@@ -156,3 +153,5 @@ bower_components
 
 # Typescript v1 declaration files
 # typings/
+
+.tasks

@@ -15,9 +15,8 @@ export const createDynamicRouter = (
 ) => {
   // 根据用户权限生成路由
   const dynamicRoutes = generateLayoutRoutes(routes, userRolesSet, userPermissionsSet)
-  console.log("createDynamicRouter", env.APP_BASE_PATH)
   const router = createBrowserRouter(dynamicRoutes, {
-    basename: env.APP_BASE_PATH,
+    basename: env.VITE_APP_BASE_PATH,
   })
 
   return router
