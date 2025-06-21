@@ -11,13 +11,6 @@
 - **Vite 5.0** - 极速的构建工具，热更新秒级响应
 - **antd-mobile 5.36** - 移动端UI组件库
 
-### 📱 移动端优化
-
-- 移动端优先的响应式设计
-- 触摸友好的交互体验
-- PWA支持，可安装到手机桌面
-- 适配各种移动设备屏幕
-
 ### 🔐 权限管理系统
 
 - **基于 RBAC 模型** - 角色权限访问控制，支持角色和权限的精细化管理
@@ -50,13 +43,6 @@
 - 自动错误处理
 - TypeScript类型推导
 
-### 🎨 UI/UX
-
-- 完整的移动端UI组件
-- 一致的设计规范
-- 支持主题定制
-- 国际化支持（i18next）
-
 ### 🔧 开发工具
 
 - ESLint + Prettier 代码规范
@@ -71,7 +57,7 @@
 | ------ | ------------ | ------ | -------------------- |
 | 框架   | React        | 18.2.0 | 用户界面库           |
 | 语言   | TypeScript   | 5.2.2  | 类型安全的JavaScript |
-| 构建   | Vite         | 5.0.0  | 下一代前端构建工具   |
+| 构建   | Vite         | 5.0.0  | 构建工具             |
 | UI库   | antd-mobile  | 5.36.1 | 移动端UI组件库       |
 | 路由   | react-router | 7.6.2  | 声明式路由           |
 | 状态   | zustand      | 4.4.7  | 轻量级状态管理       |
@@ -83,6 +69,7 @@
 
 ```
 src/
+├── access/              # 权限定义
 ├── api/                 # API接口定义
 ├── assets/              # 静态资源
 ├── components/          # 公共组件
@@ -90,6 +77,7 @@ src/
 │   └── ...
 ├── config/              # 配置文件
 ├── hooks/               # 自定义Hooks
+├── mock/                # Mock数据
 ├── pages/               # 页面组件
 │   ├── Home/           # 首页
 │   ├── Login/          # 登录页
@@ -149,7 +137,7 @@ pnpm setup-env
 pnpm dev
 ```
 
-服务器将在 `http://localhost:5173` 启动，支持热重载。
+服务器将在 `http://localhost:3000` 启动，支持热重载。
 
 ### 5. 构建生产版本
 
@@ -160,21 +148,6 @@ pnpm build
 # 预览构建结果
 pnpm preview
 ```
-
-## 📋 可用脚本
-
-| 命令                | 说明               |
-| ------------------- | ------------------ |
-| `pnpm dev`          | 启动开发服务器     |
-| `pnpm build`        | 构建生产版本       |
-| `pnpm preview`      | 预览构建结果       |
-| `pnpm lint`         | 运行ESLint检查     |
-| `pnpm lint:fix`     | 自动修复ESLint问题 |
-| `pnpm format`       | 格式化代码         |
-| `pnpm format:check` | 检查代码格式       |
-| `pnpm type-check`   | TypeScript类型检查 |
-| `pnpm code-check`   | 运行所有代码检查   |
-| `pnpm check-env`    | 检查环境配置       |
 
 ## 🎯 功能演示
 
