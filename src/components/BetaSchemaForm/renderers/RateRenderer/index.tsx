@@ -18,23 +18,16 @@ export interface RateRendererProps<T extends SchemaFormValuesType>
  * 评分渲染器
  */
 const RateRenderer = <T extends SchemaFormValuesType>({
-  value,
-  onChange,
   disabled = false,
   className,
   ...restProps
 }: RateRendererProps<T>) => {
-  // 处理 onChange 事件，确保类型兼容
-  const handleChange = (val: number) => {
-    onChange?.(val)
-  }
-
   return (
     <div
       className={classNames("schema-form-rate-renderer", className)}
       style={{ opacity: disabled ? 0.5 : 1, pointerEvents: disabled ? "none" : "auto" }}
     >
-      <Rate value={value} onChange={handleChange} {...restProps} />
+      <Rate {...restProps} />
     </div>
   )
 }

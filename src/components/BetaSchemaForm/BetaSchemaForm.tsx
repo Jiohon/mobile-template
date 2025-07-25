@@ -18,24 +18,24 @@ import {
 
 const BetaSchemaForm = <TValues extends SchemaFormValuesType = SchemaFormValuesType>({
   columns = [],
-  initialValues = {},
-  onValuesChange,
-  onFinish,
-  onFinishFailed,
-  showSubmitButton = false,
   submitButtonText = "提交",
   submitButtonProps = {},
   formRef,
   // 从 props 中提取 antd-mobile Form 的原生属性
   name,
+  form: externalForm,
+  initialValues = {},
   disabled = false,
+  className,
+  style,
   preserve,
   validateMessages,
   validateTrigger,
+  footer,
+  onFinish,
+  onFinishFailed,
+  onValuesChange,
   onFieldsChange,
-  form: externalForm,
-  className,
-  style,
   ...restProps
 }: SchemaFormProps<TValues>) => {
   // 使用 antd-mobile 的标准 Form.useForm
@@ -67,11 +67,9 @@ const BetaSchemaForm = <TValues extends SchemaFormValuesType = SchemaFormValuesT
     form
       .validateFields()
       .then((values: TValues) => {
-        setIsValidating(false)
         onFinish?.(cloneDeep(values))
       })
       .catch((errorInfo: SchemaFormErrorInfoType<TValues>) => {
-        setIsValidating(false)
         onFinishFailed?.(errorInfo)
       })
       .finally(() => {
@@ -150,18 +148,10 @@ const BetaSchemaForm = <TValues extends SchemaFormValuesType = SchemaFormValuesT
         onFieldsChange={onFieldsChange}
         style={style}
         {...restProps}
-      >
-        {/* 渲染基础字段 */}
-        {columns.map((column, index) => {
-          if (column.componentType === "dependency") {
-            return renderDependencyColumn(column, `dependency-${index}`)
-          }
-          return renderFormColumn(column, `${String(column.name)}-${index}`)
-        })}
-
-        {showSubmitButton && (
-          <Form.Item>
+        footer={
+          footer || (
             <Button
+              block
               color="primary"
               onClick={handleSubmit}
               loading={isValidating}
@@ -170,8 +160,16 @@ const BetaSchemaForm = <TValues extends SchemaFormValuesType = SchemaFormValuesT
             >
               {submitButtonText}
             </Button>
-          </Form.Item>
-        )}
+          )
+        }
+      >
+        {/* 渲染基础字段 */}
+        {columns.map((column, index) => {
+          if (column.componentType === "dependency") {
+            return renderDependencyColumn(column, `dependency-${index}`)
+          }
+          return renderFormColumn(column, `${String(column.name)}-${index}`)
+        })}
       </Form>
     </div>
   )

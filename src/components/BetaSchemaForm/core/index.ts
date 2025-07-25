@@ -3,36 +3,45 @@ import React from "react"
 import { omit } from "lodash-es"
 
 import {
-  ExtractRendererCompPropsType,
-  RendererCompNameType,
-  RendererCompType,
+  ExtractPropsType,
   SchemaFormBaseColumnType,
   SchemaFormColumnConfigType,
+  SchemaFormCompNameType,
+  SchemaFormCompPropsType,
   SchemaFormInstance,
   SchemaFormValuesType,
 } from "../types"
 
-type RendererValueType<
-  TCompType extends RendererCompNameType,
+/**
+ * 渲染器 Map 类型 - key
+ * @template TCompType - 渲染器组件类型
+ * @template TValues - 表单数据类型
+ */
+export type RendererKeyType = SchemaFormCompNameType
+
+/**
+ * 渲染器 Map 类型 - value
+ * @template TCompType - 渲染器组件类型
+ * @template TValues - 表单数据类型
+ */
+export type RendererValueType<
+  TCompType extends SchemaFormCompNameType,
   TValues extends SchemaFormValuesType = SchemaFormValuesType,
 > =
   | {
-      renderer: React.ComponentType<ExtractRendererCompPropsType<TCompType, TValues>>
+      renderer: React.ComponentType<ExtractPropsType<TCompType, TValues>>
       transformProps?: (
         props: SchemaFormColumnConfigType<TCompType, TValues>
       ) => SchemaFormColumnConfigType<TCompType, TValues>
     }
-  | React.ComponentType<ExtractRendererCompPropsType<TCompType, TValues>>
+  | React.ComponentType<ExtractPropsType<TCompType, TValues>>
 
 /**
  * 核心字段渲染器类
  * @template TValues - 表单数据类型，继承自 SchemaFormValuesType
  */
 export class SchemaRenderer<TValues extends SchemaFormValuesType = SchemaFormValuesType> {
-  private renderers = new Map<
-    RendererCompNameType,
-    RendererValueType<RendererCompNameType, TValues>
-  >()
+  private renderers = new Map<RendererKeyType, RendererValueType<RendererKeyType, TValues>>()
 
   /**
    * 注册字段渲染器
@@ -40,11 +49,11 @@ export class SchemaRenderer<TValues extends SchemaFormValuesType = SchemaFormVal
    * @param componentType - 字段类型标识
    * @param renderer - 对应的渲染组件
    */
-  register<TCompType extends RendererCompNameType>(
+  register<TCompType extends RendererKeyType>(
     componentType: TCompType,
     renderer: RendererValueType<TCompType, TValues>
   ): void {
-    this.renderers.set(componentType, renderer as RendererValueType<RendererCompNameType, TValues>)
+    this.renderers.set(componentType, renderer as RendererValueType<RendererKeyType, TValues>)
   }
 
   /**
@@ -52,7 +61,7 @@ export class SchemaRenderer<TValues extends SchemaFormValuesType = SchemaFormVal
    * @param componentType - 字段类型标识
    * @returns 对应的渲染组件或默认文本渲染器
    */
-  getRenderer<TCompType extends RendererCompNameType>(
+  getRenderer<TCompType extends RendererKeyType>(
     componentType: TCompType
   ): RendererValueType<TCompType, TValues> | undefined {
     return this.renderers.get(componentType) as RendererValueType<TCompType, TValues>
@@ -63,7 +72,7 @@ export class SchemaRenderer<TValues extends SchemaFormValuesType = SchemaFormVal
    * @param componentType - 字段类型标识
    * @returns 是否已注册
    */
-  hasRenderer(componentType: RendererCompNameType): boolean {
+  hasRenderer(componentType: RendererKeyType): boolean {
     return this.renderers.has(componentType)
   }
 
@@ -71,7 +80,7 @@ export class SchemaRenderer<TValues extends SchemaFormValuesType = SchemaFormVal
    * 获取所有已注册的渲染器类型
    * @returns 已注册的字段类型数组
    */
-  getRegisteredTypes(): RendererCompNameType[] {
+  getRegisteredTypes(): RendererKeyType[] {
     return Array.from(this.renderers.keys())
   }
 
@@ -124,7 +133,7 @@ export class SchemaRenderer<TValues extends SchemaFormValuesType = SchemaFormVal
    * 移除特定类型的渲染器
    * @param componentType - 要移除的字段类型
    */
-  unregister(componentType: RendererCompNameType): boolean {
+  unregister(componentType: RendererKeyType): boolean {
     return this.renderers.delete(componentType)
   }
 }
@@ -151,12 +160,12 @@ export const createSchemaRenderer = <
 export const createRenderConfig = <TValues extends SchemaFormValuesType>(
   column: SchemaFormBaseColumnType<TValues>,
   form: SchemaFormInstance
-): RendererCompType<TValues> => {
+): SchemaFormCompPropsType<TValues> => {
   const formItemProps = omit(column, ["componentProps"])
 
   // 移除对 form.getFieldValue 的调用，避免在渲染期间访问未连接的 form 实例
   // Form.Item 会自动管理字段值，无需手动获取和传递
-  const config: RendererCompType<TValues> = {
+  const config: SchemaFormCompPropsType<TValues> = {
     ...column.componentProps,
     formInstance: form,
     formItemProps,

@@ -12,9 +12,10 @@ import "./index.less"
  * NumberRenderer组件的Props类型
  */
 export interface NumberRendererProps<T extends SchemaFormValuesType>
-  extends ExpandRendererPropsType<"number", Omit<InputProps, "value">, T> {
+  extends ExpandRendererPropsType<"number", Omit<InputProps, "value" | "onChange">, T> {
   value?: number
-  type?: "number" | "digit"
+  type?: "number"
+  onChange?: (value: number | string) => void
 }
 
 /**
@@ -24,20 +25,27 @@ export interface NumberRendererProps<T extends SchemaFormValuesType>
  */
 const NumberRenderer = <T extends SchemaFormValuesType>({
   value,
-  type = "number",
+  type,
   className,
   formItemProps,
   formInstance,
+  onChange,
   ...restProps
 }: NumberRendererProps<T>): React.ReactElement => {
   const placeholder = restProps?.placeholder || `请输入${formItemProps.label}`
 
+  const handleChange = (value: string) => {
+    const numberValue = Number.isNaN(Number(value)) ? "" : Number(value)
+    onChange?.(numberValue)
+  }
+
   return (
     <Input
       className={classNames("schema-form-number-renderer", className)}
-      type={type}
+      type={"number"}
       value={value?.toString() || ""}
       placeholder={placeholder}
+      onChange={handleChange}
       {...restProps}
     />
   )

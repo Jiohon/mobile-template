@@ -18,11 +18,11 @@ export interface SliderRendererProps<T extends SchemaFormValuesType>
  * 滑块渲染器
  */
 const SliderRenderer = <T extends SchemaFormValuesType>({
-  value,
   className,
   readOnly,
   formItemProps,
   formInstance,
+  popover = true,
   ...restProps
 }: SliderRendererProps<T>) => {
   return (
@@ -30,7 +30,7 @@ const SliderRenderer = <T extends SchemaFormValuesType>({
       className={classNames("schema-form-slider-renderer", className)}
       style={{ pointerEvents: readOnly ? "none" : "auto" }}
     >
-      <Slider value={value} {...restProps} />
+      <Slider {...restProps} popover={popover} />
     </div>
   )
 }

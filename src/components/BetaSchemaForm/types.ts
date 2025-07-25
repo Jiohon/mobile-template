@@ -1,25 +1,12 @@
 import React from "react"
 
-import type {
-  CheckboxRendererProps,
-  CustomRendererProps,
-  DateRendererProps,
-  NumberRendererProps,
-  PickerRendererProps,
-  RadioRendererProps,
-  RateRendererProps,
-  SelectRendererProps,
-  SliderRendererProps,
-  SwitchRendererProps,
-  TextAreaRendererProps,
-  TextRendererProps,
-  UploadRendererProps,
-} from "./renderers"
-import type { FormProps as AntdMobileFormProps, ButtonProps, SelectorOption } from "antd-mobile"
+import type { SchemaFormCompMap } from "./core/registerRenderers"
+import type { FormProps as AntdMobileFormProps, ButtonProps } from "antd-mobile"
 import type { FormInstance as AntdMobileFormInstance } from "antd-mobile/es/components/form"
 import type { FormItemProps as AntdMobileFormItemProps } from "antd-mobile/es/components/form/form-item"
 
 // ==================== 基础类型定义 ====================
+
 /**
  * 表单数据的基础类型约束
  * 所有表单数据类型都必须继承此类型
@@ -27,29 +14,45 @@ import type { FormItemProps as AntdMobileFormItemProps } from "antd-mobile/es/co
 export type SchemaFormValuesType = unknown
 
 /**
- * 重新导出 antd-mobile 的选项类型
- * @template TValue - 选项值的类型，默认为 string | number
- */
-export type SchemaFormOptionType<TValue = string | number> = SelectorOption<TValue>
-
-// ==================== 表单实例类型定义 ====================
-
-/**
  * 扩展的 antd-mobile 表单实例类型，添加类型安全的泛型支持
  * @template TValues - 表单数据类型
  */
 export type SchemaFormInstance = AntdMobileFormInstance
 
-// ==================== 渲染器组件类型映射 ====================
+// ==================== 渲染器核心类型 ====================
 
 /**
- * 渲染器所需的 Props
- * @template TCompType - 字段类型
- * @template TProps - 原始渲染器组件 Props 类型
+ * componentType 类型
+ * 所有渲染器组件名称类型
+ */
+export type SchemaFormCompNameType = keyof SchemaFormCompMap<SchemaFormValuesType>
+
+/**
+ * 所有 componentType 的 Props 类型
  * @template TValues - 表单数据类型
  */
-interface ExpandProps<
-  TCompType extends RendererCompNameType,
+export type SchemaFormCompPropsType<TValues extends SchemaFormValuesType> =
+  SchemaFormCompMap<TValues>[keyof SchemaFormCompMap<TValues>]
+
+// ==================== 渲染器扩展类型 ====================
+
+/**
+ * 根据 componentType 提取对应的渲染器组件 Props 类型
+ * @template TCompType - 组件类型
+ * @template TValues - 表单数据类型
+ */
+export type ExtractPropsType<
+  TCompType extends SchemaFormCompNameType,
+  TValues extends SchemaFormValuesType,
+> = SchemaFormCompMap<TValues>[TCompType]
+
+/**
+ * 扩展 **formItemProps** 、**formInstance** 字段
+ * @template TCompType - 组件类型
+ * @template TValues - 表单数据类型
+ */
+export interface ExpandFieldType<
+  TCompType extends SchemaFormCompNameType,
   TValues extends SchemaFormValuesType,
 > {
   formItemProps: Omit<SchemaFormColumnConfigType<TCompType, TValues>, "componentProps">
@@ -58,66 +61,25 @@ interface ExpandProps<
 
 /**
  * 渲染器组件扩展 Props 类型
- * @template TCompType - 字段类型
- * @template TProps - 原始渲染器组件 Props 类型
+ * @template TCompType - 组件类型
+ * @template TProps - 组件 Props 类型
  * @template TValues - 表单数据类型
  */
 export type ExpandRendererPropsType<
-  TCompType extends RendererCompNameType,
+  TCompType extends SchemaFormCompNameType,
   TProps,
   TValues extends SchemaFormValuesType,
-> = TProps & ExpandProps<TCompType, TValues>
+> = TProps & ExpandFieldType<TCompType, TValues>
 
-/**
- * 字段类型到对应渲染器组件 Props 的映射
- * @template TValues - 表单数据类型
- */
-export type SchemaFormCompMap<TValues extends SchemaFormValuesType> = {
-  text: TextRendererProps<TValues>
-  number: NumberRendererProps<TValues>
-  switch: SwitchRendererProps<TValues>
-  select: SelectRendererProps<TValues>
-  radio: RadioRendererProps<TValues>
-  checkbox: CheckboxRendererProps<TValues>
-  date: DateRendererProps<TValues>
-  picker: PickerRendererProps<TValues>
-  rate: RateRendererProps<TValues>
-  slider: SliderRendererProps<TValues>
-  textArea: TextAreaRendererProps<TValues>
-  upload: UploadRendererProps<TValues>
-  custom: CustomRendererProps<TValues>
-}
-
-/**
- * componentType 类型
- * 所有渲染器组件名称类型
- */
-export type RendererCompNameType = keyof SchemaFormCompMap<SchemaFormValuesType>
-
-/**
- * 所有 componentType 的 Props 类型
- * @template TValues - 表单数据类型
- */
-export type RendererCompType<TValues extends SchemaFormValuesType> =
-  SchemaFormCompMap<TValues>[keyof SchemaFormCompMap<TValues>]
-
-/**
- * 根据 componentType 提取对应的渲染器组件 Props 类型
- * @template TCompType - 字段类型
- * @template TValues - 表单数据类型
- */
-export type ExtractRendererCompPropsType<
-  TCompType extends RendererCompNameType,
-  TValues extends SchemaFormValuesType,
-> = SchemaFormCompMap<TValues>[TCompType]
+// ==================== 字段配置类型 ====================
 
 /**
  * 表单渲染器组件的基础配置类型
- * @template TCompType - 字段类型
+ * @template TCompType - 组件类型
  * @template TValues - 表单数据类型
  */
 export type SchemaFormColumnConfigType<
-  TCompType extends RendererCompNameType,
+  TCompType extends SchemaFormCompNameType,
   TValues extends SchemaFormValuesType,
 > = Omit<AntdMobileFormItemProps, "name" | "children" | "initialValue"> & {
   /** 字段名称，必须是表单数据中的键 */
@@ -125,27 +87,27 @@ export type SchemaFormColumnConfigType<
   /** 字段类型标识符 */
   componentType: TCompType
   /** 字段初始值 */
-  initialValue?: ExtractRendererCompPropsType<TCompType, TValues>["value"]
+  initialValue?: ExtractPropsType<TCompType, TValues>["value"]
   /**
    * 字段属性配置
-   * 排除 ExpandProps 组件内部字段
+   * 排除 ExpandFieldType 组件内部字段
    */
   componentProps?: Omit<
-    ExpandRendererPropsType<TCompType, ExtractRendererCompPropsType<TCompType, TValues>, TValues>,
-    keyof ExpandProps<TCompType, TValues>
+    ExpandRendererPropsType<TCompType, ExtractPropsType<TCompType, TValues>, TValues>,
+    keyof ExpandFieldType<TCompType, TValues>
   >
 }
 
 /**
- * 基础column类型配置类型
+ * 基础 column 类型配置类型
  * @template TValues - 表单数据类型
  */
 export type SchemaFormBaseColumnType<TValues extends SchemaFormValuesType> = {
   [K in keyof SchemaFormCompMap<TValues>]: SchemaFormColumnConfigType<K, TValues>
 }[keyof SchemaFormCompMap<TValues>]
 
-/**
- * 依赖column配置类型
+/**ƒ
+ * 依赖 column 配置类型
  * @template TValues - 表单数据类型
  */
 export type SchemaFormDependencyColumnType<TValues extends SchemaFormValuesType> = {
@@ -161,12 +123,14 @@ export type SchemaFormDependencyColumnType<TValues extends SchemaFormValuesType>
 }
 
 /**
- * 完整的column配置类型（包括基础column和依赖column）
+ * 完整的 column 配置类型（包括基础 column 和依赖 column）
  * @template TValues - 表单数据类型
  */
 export type SchemaFormColumnType<TValues extends SchemaFormValuesType> =
   | SchemaFormBaseColumnType<TValues>
   | SchemaFormDependencyColumnType<TValues>
+
+// ==================== 表单组件类型 ====================
 
 /**
  * 表单验证错误信息类型
@@ -193,8 +157,6 @@ export type SchemaFormProps<TValues extends SchemaFormValuesType> = Omit<
   columns: SchemaFormColumnType<TValues>[]
   /** 表单初始值 */
   initialValues?: Partial<TValues>
-  /** 是否显示提交按钮 */
-  showSubmitButton?: boolean
   /** 提交按钮文本 */
   submitButtonText?: string
   /** 提交按钮属性 */

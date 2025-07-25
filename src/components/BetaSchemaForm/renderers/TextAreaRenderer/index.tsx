@@ -18,6 +18,7 @@ export interface TextAreaRendererProps<T extends SchemaFormValuesType>
  */
 const TextAreaRenderer = <T extends SchemaFormValuesType>({
   className,
+  autoSize = { minRows: 2, maxRows: 6 },
   formItemProps,
   formInstance,
   ...restProps
@@ -28,6 +29,7 @@ const TextAreaRenderer = <T extends SchemaFormValuesType>({
     <TextArea
       className={classNames("schema-form-TextArea-renderer", className)}
       placeholder={placeholder}
+      autoSize={autoSize}
       {...restProps}
     />
   )

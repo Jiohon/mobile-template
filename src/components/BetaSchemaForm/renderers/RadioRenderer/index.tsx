@@ -23,7 +23,6 @@ export interface RadioRendererProps<T extends SchemaFormValuesType>
  * 单选框渲染器
  */
 const RadioRenderer = <T extends SchemaFormValuesType>({
-  value,
   options = [],
   className,
   formItemProps,
@@ -32,7 +31,7 @@ const RadioRenderer = <T extends SchemaFormValuesType>({
 }: RadioRendererProps<T>) => {
   return (
     <div className={classNames("schema-form-radio-renderer", className)}>
-      <Radio.Group value={value} {...restProps}>
+      <Radio.Group {...restProps}>
         <Space wrap style={{ "--gap-horizontal": "12px", "--gap-vertical": "8px" }}>
           {options.map((option) => (
             <Radio key={option.value} value={option.value} disabled={option.disabled}>
