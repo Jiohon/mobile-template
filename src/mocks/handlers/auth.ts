@@ -49,7 +49,7 @@ const generateRefreshToken = () => generateRandomString("lower", 32)
 
 export const authHandlers = [
   // 用户登录
-  http.post("http://localhost:3000/api/auth/login", async ({ request }) => {
+  http.post("/api/auth/login", async ({ request }) => {
     const body = (await request.json()) as { username: string; password: string }
     const { username, password } = body
 
@@ -106,7 +106,7 @@ export const authHandlers = [
   }),
 
   // 刷新Token
-  http.post("http://localhost:3000/api/auth/refresh", async ({ request }) => {
+  http.post("/api/auth/refresh", async ({ request }) => {
     const body = (await request.json()) as { refresh_token: string }
     const { refresh_token } = body
 
@@ -148,7 +148,7 @@ export const authHandlers = [
   }),
 
   // 用户登出
-  http.post("http://localhost:3000/api/auth/logout", () => {
+  http.post("/api/auth/logout", () => {
     // 清除登录状态
     currentToken = null
     currentUser = null
@@ -163,7 +163,7 @@ export const authHandlers = [
   }),
 
   // 获取当前用户信息
-  http.get("http://localhost:3000/api/auth/me", ({ request }) => {
+  http.get("/api/auth/me", ({ request }) => {
     const authorization =
       request.headers.get("authorization") || request.headers.get("Authorization")
     const token = authorization?.replace("Bearer ", "")
@@ -187,7 +187,7 @@ export const authHandlers = [
   }),
 
   // 更新用户信息
-  http.put("http://localhost:3000/api/auth/user", async ({ request }) => {
+  http.put("/api/auth/user", async ({ request }) => {
     const authorization =
       request.headers.get("authorization") || request.headers.get("Authorization")
     const token = authorization?.replace("Bearer ", "")
@@ -229,7 +229,7 @@ export const authHandlers = [
   }),
 
   // 修改密码
-  http.post("http://localhost:3000/api/auth/change-password", async ({ request }) => {
+  http.post("/api/auth/change-password", async ({ request }) => {
     const authorization =
       request.headers.get("authorization") || request.headers.get("Authorization")
     const token = authorization?.replace("Bearer ", "")
