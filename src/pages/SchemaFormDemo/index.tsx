@@ -9,7 +9,7 @@ import {
   SchemaFormInstance,
 } from "@/components/BetaSchemaForm/types"
 
-import { createBasicFields, DemoFormValues } from "./field"
+import { createBasicFields, DemoFormValues } from "./field.tsx"
 import styles from "./index.module.less"
 
 const SchemaFormDemo: React.FC = () => {
@@ -78,17 +78,24 @@ const SchemaFormDemo: React.FC = () => {
 
   const handleFillDemo = () => {
     const demoData: Partial<DemoFormValues> = {
-      name: "张三",
-      age: 28,
-      remark: "这是一个示例备注",
+      name: "11",
+      age: 22,
       gender: "male",
-      city: "beijing",
-      hobbies: ["reading", "music", "travel"],
+      city: ["beijing"],
+      hobbies: ["music"],
       isVip: true,
-      birthday: "1995-06-15",
-      workStartDate: ["2020"],
+      birthday: "2025-07-26 00:00:00",
+      workStartDate: ["2015"],
       cascader: ["浙江", "杭州", "西湖区"],
-      customField: "自定义字段值",
+      avatar: [
+        {
+          url: "https://picsum.photos/200/300",
+        },
+      ],
+      remark: "123",
+      rate: 3,
+      slider: 17,
+      stepper: 3,
     }
 
     formRef.current?.setFieldsValue(demoData)
@@ -151,7 +158,28 @@ const SchemaFormDemo: React.FC = () => {
           <BetaSchemaForm<DemoFormValues>
             layout="horizontal"
             formRef={formRef}
+            initialValues={{
+              name: "11",
+              age: 22,
+              gender: "male",
+              city: ["beijing"],
+              hobbies: ["music"],
+              isVip: true,
+              birthday: "2025-07-26 00:00:00",
+              workStartDate: ["2015"],
+              cascader: ["浙江", "杭州", "西湖区"],
+              avatar: [
+                {
+                  url: "https://picsum.photos/200/300",
+                },
+              ],
+              remark: "123",
+              rate: 3,
+              slider: 17,
+              stepper: 3,
+            }}
             columns={currentColumns}
+            readOnly={false}
             onFinish={handleFinish}
             onFinishFailed={handleFinishFailed}
             onValuesChange={handleValuesChange}

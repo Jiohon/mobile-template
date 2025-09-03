@@ -1,10 +1,8 @@
-import { useState } from "react"
-
 import { Cascader, Input } from "antd-mobile"
 import { CascaderValue, CascaderValueExtend } from "antd-mobile/es/components/cascader-view"
 import classNames from "classnames"
 
-import type { ExpandRendererPropsType, SchemaFormValuesType } from "../../types"
+import type { ExpandCompPropsType, SchemaFormValuesType } from "../../types"
 import type { CascaderProps } from "antd-mobile"
 
 import "./index.less"
@@ -13,7 +11,7 @@ import "./index.less"
  * DateRenderer组件的Props类型
  */
 export interface CascaderRendererProps<T extends SchemaFormValuesType>
-  extends ExpandRendererPropsType<"cascader", CascaderProps, T> {
+  extends ExpandCompPropsType<"cascader", CascaderProps, T> {
   separator?: string
   disabled?: boolean
   readOnly?: boolean
@@ -28,43 +26,41 @@ const CascaderRenderer = <T extends SchemaFormValuesType>({
   separator = " - ",
   value,
   onConfirm,
-  disabled,
-  readOnly,
   className,
   formItemProps,
   formInstance,
   ...restProps
 }: CascaderRendererProps<T>) => {
-  const [visible, setVisible] = useState(false)
-
   const placeholder = restProps?.placeholder || `请选择${formItemProps.label}`
 
+  const readOnly = restProps?.readOnly || formItemProps?.readOnly
+  const disabled = restProps?.disabled || formItemProps?.disabled
+
   const handleConfirm = (value: CascaderValue[], extend: CascaderValueExtend) => {
-    console.log("handleConfirm", value, extend)
+    if (readOnly || disabled) return
+
     onConfirm?.(value, extend)
     restProps?.onChange?.(value, extend)
-    setVisible(false)
   }
 
-  const handleClick = () => {
+  const handleClick = (open: () => void) => {
     if (readOnly || disabled) return
-    setVisible(true)
+
+    open()
   }
 
   return (
     <Cascader
-      visible={visible}
       value={value}
       onConfirm={handleConfirm}
       title={restProps?.title ?? placeholder}
       {...restProps}
     >
-      {(items) => {
-        console.log("items", items)
+      {(items, { open }) => {
         return (
           <div
             className={classNames("schema-form-cascader-renderer", className)}
-            onClick={handleClick}
+            onClick={() => handleClick(open)}
           >
             <Input
               placeholder={placeholder}

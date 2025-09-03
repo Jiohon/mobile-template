@@ -44,7 +44,7 @@ const MSWLoadingWrapper: React.FC<MSWLoadingWrapperProps> = ({
 
   useEffect(() => {
     initializeMSW()
-  }, [enableMock])
+  }, [])
 
   const handleRetry = () => {
     setRetryCount((count) => count + 1)

@@ -1,4 +1,4 @@
-import { SchemaFormColumnType } from "@/components/BetaSchemaForm/types"
+import type { SchemaFormColumnType } from "@/components/BetaSchemaForm/types"
 
 import type { SelectorOption } from "antd-mobile"
 
@@ -11,7 +11,7 @@ export interface DemoFormValues {
 
   // 选择字段
   gender: string
-  city: string
+  city: string | string[]
   district: string
   hobbies: string[]
 
@@ -69,6 +69,7 @@ export const createBasicFields = (): SchemaFormColumnType<DemoFormValues>[] => {
         { min: 2, max: 20, message: "姓名长度为2-20个字符" },
       ],
       componentProps: {
+        readOnly: true,
         placeholder: "请输入您的姓名",
         clearable: true,
       },
@@ -82,6 +83,8 @@ export const createBasicFields = (): SchemaFormColumnType<DemoFormValues>[] => {
         { required: true, message: "请输入年龄" },
         { type: "number", min: 18, max: 100, message: "年龄必须在18-100之间" },
       ],
+      readOnly: true,
+      initialValue: 18,
       componentProps: {
         placeholder: "请输入年龄",
       },
@@ -93,6 +96,7 @@ export const createBasicFields = (): SchemaFormColumnType<DemoFormValues>[] => {
       required: true,
       rules: [{ required: true, message: "请选择性别" }],
       componentProps: {
+        readOnly: true,
         options: [
           { label: "男", value: "male" },
           { label: "女", value: "female" },
@@ -118,8 +122,8 @@ export const createBasicFields = (): SchemaFormColumnType<DemoFormValues>[] => {
       to: ["city"],
       children(changedValues) {
         const { city } = changedValues
-        if (city) {
-          const districtOptions = getDistrictOptions(city)
+        if (city && city.length > 0) {
+          const districtOptions = getDistrictOptions(city.toString())
           if (districtOptions.length > 0) {
             return [
               {
@@ -142,6 +146,7 @@ export const createBasicFields = (): SchemaFormColumnType<DemoFormValues>[] => {
       label: "兴趣爱好",
       name: "hobbies",
       componentType: "checkbox",
+      readOnly: true,
       componentProps: {
         options: [
           { label: "🎵 音乐", value: "music" },
@@ -273,9 +278,10 @@ export const createBasicFields = (): SchemaFormColumnType<DemoFormValues>[] => {
     {
       label: "头像",
       name: "avatar",
+      initialValue: [{ url: "https://picsum.photos/200/300" }],
       componentType: "upload",
       componentProps: {
-        maxCount: 1,
+        maxCount: 5,
         upload: async (file) => {
           // 模拟上传
           await new Promise((resolve) => setTimeout(resolve, 1000))
@@ -306,10 +312,23 @@ export const createBasicFields = (): SchemaFormColumnType<DemoFormValues>[] => {
       name: "slider",
       componentType: "slider",
       componentProps: {
+        readOnly: true,
         min: 0,
         max: 100,
         step: 1,
+        renderReadOnly: (props) => {
+          console.log(props, "renderReadOnly")
+          return <div>renderReadOnly: {props.value}</div>
+        },
       },
+      // renderFormItem: (props) => {
+      //   console.log(props, "renderFormItem")
+      //   return (
+      //     <Form.Item key={1223} {...props} label={"props.label"}>
+      //       <div>renderFormItem: {props.value}</div>
+      //     </Form.Item>
+      //   )
+      // },
     },
     {
       label: "步进器",

@@ -1,7 +1,7 @@
 import { TextArea } from "antd-mobile"
 import classNames from "classnames"
 
-import type { ExpandRendererPropsType, SchemaFormValuesType } from "../../types"
+import type { ExpandCompPropsType, SchemaFormValuesType } from "../../types"
 import type { TextAreaProps } from "antd-mobile"
 
 import "./index.less"
@@ -9,8 +9,13 @@ import "./index.less"
 /**
  * TextAreaRenderer组件的Props类型
  */
-export interface TextAreaRendererProps<T extends SchemaFormValuesType>
-  extends ExpandRendererPropsType<"text", TextAreaProps, T> {}
+// export interface TextAreaRendererProps<T extends SchemaFormValuesType>
+//   extends ExpandCompPropsType<"text", TextAreaProps, T> {}
+export type TextAreaRendererProps<T extends SchemaFormValuesType> = ExpandCompPropsType<
+  "text",
+  TextAreaProps,
+  T
+>
 
 /**
  * 文本输入渲染器
@@ -25,12 +30,15 @@ const TextAreaRenderer = <T extends SchemaFormValuesType>({
 }: TextAreaRendererProps<T>) => {
   const placeholder = restProps?.placeholder || `请输入${formItemProps.label}`
 
+  const readOnly = restProps?.readOnly || formItemProps?.readOnly
+
   return (
     <TextArea
       className={classNames("schema-form-TextArea-renderer", className)}
       placeholder={placeholder}
       autoSize={autoSize}
       {...restProps}
+      readOnly={readOnly}
     />
   )
 }

@@ -52,8 +52,8 @@ export type SchemaFormCompMap<TValues extends SchemaFormValuesType> = {
   slider: SliderRendererProps<TValues>
   stepper: StepperRendererProps<TValues>
   upload: UploadRendererProps<TValues>
-  custom: CustomRendererProps<TValues>
   cascader: CascaderRendererProps<TValues>
+  custom: CustomRendererProps<TValues>
 }
 
 /**
@@ -62,7 +62,6 @@ export type SchemaFormCompMap<TValues extends SchemaFormValuesType> = {
 export const registerDefaultRenderers = <TValues extends SchemaFormValuesType>(
   renderer: SchemaRenderer<TValues>
 ) => {
-  // 文本类型
   renderer.register("text", TextRenderer)
   renderer.register("textArea", TextAreaRenderer)
   renderer.register("number", NumberRenderer)

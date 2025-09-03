@@ -4,7 +4,7 @@ import { DatePicker, Input } from "antd-mobile"
 import classNames from "classnames"
 import dayjs from "dayjs"
 
-import { ExpandRendererPropsType, SchemaFormValuesType } from "../../types"
+import { ExpandCompPropsType, SchemaFormValuesType } from "../../types"
 
 import { weekdayToZh } from "./labelRender"
 
@@ -23,9 +23,9 @@ export type FormatType = Generic | GenericFn
  * DateRenderer组件的Props类型
  */
 export interface DateRendererProps<T extends SchemaFormValuesType>
-  extends ExpandRendererPropsType<"date", Omit<DatePickerProps, "value">, T> {
-  disabled?: boolean
+  extends ExpandCompPropsType<"date", Omit<DatePickerProps, "value">, T> {
   readOnly?: boolean
+  disabled?: boolean
   placeholder?: string
   format?: FormatType
   popupClassName?: string
@@ -41,8 +41,6 @@ export interface DateRendererProps<T extends SchemaFormValuesType>
 const DateRenderer = <T extends SchemaFormValuesType>({
   value,
   onConfirm,
-  disabled,
-  readOnly,
   format = "YYYY-MM-DD HH:mm:ss",
   className,
   popupClassName,
@@ -51,6 +49,9 @@ const DateRenderer = <T extends SchemaFormValuesType>({
   ...restProps
 }: DateRendererProps<T>) => {
   const placeholder = restProps?.placeholder || `请选择${formItemProps.label}`
+
+  const readOnly = restProps?.readOnly || formItemProps?.readOnly
+  const disabled = restProps?.disabled || formItemProps?.disabled
 
   const labelRenderer = useCallback((type: string, data: number) => {
     switch (type) {

@@ -25,14 +25,15 @@ export type SchemaFormInstance = AntdMobileFormInstance
  * componentType 类型
  * 所有渲染器组件名称类型
  */
-export type SchemaFormCompNameType = keyof SchemaFormCompMap<SchemaFormValuesType>
+export type SchemaFormCompNameType<TValues extends SchemaFormValuesType> =
+  keyof SchemaFormCompMap<TValues>
 
 /**
  * 所有 componentType 的 Props 类型
  * @template TValues - 表单数据类型
  */
 export type SchemaFormCompPropsType<TValues extends SchemaFormValuesType> =
-  SchemaFormCompMap<TValues>[keyof SchemaFormCompMap<TValues>]
+  SchemaFormCompMap<TValues>[SchemaFormCompNameType<TValues>]
 
 // ==================== 渲染器扩展类型 ====================
 
@@ -41,8 +42,8 @@ export type SchemaFormCompPropsType<TValues extends SchemaFormValuesType> =
  * @template TCompType - 组件类型
  * @template TValues - 表单数据类型
  */
-export type ExtractPropsType<
-  TCompType extends SchemaFormCompNameType,
+export type ExtractCompPropsType<
+  TCompType extends SchemaFormCompNameType<TValues>,
   TValues extends SchemaFormValuesType,
 > = SchemaFormCompMap<TValues>[TCompType]
 
@@ -51,8 +52,8 @@ export type ExtractPropsType<
  * @template TCompType - 组件类型
  * @template TValues - 表单数据类型
  */
-export interface ExpandFieldType<
-  TCompType extends SchemaFormCompNameType,
+export interface ExpandFormField<
+  TCompType extends keyof SchemaFormCompMap<SchemaFormValuesType>,
   TValues extends SchemaFormValuesType,
 > {
   formItemProps: Omit<SchemaFormColumnConfigType<TCompType, TValues>, "componentProps">
@@ -65,11 +66,18 @@ export interface ExpandFieldType<
  * @template TProps - 组件 Props 类型
  * @template TValues - 表单数据类型
  */
-export type ExpandRendererPropsType<
-  TCompType extends SchemaFormCompNameType,
+export type ExpandCompPropsType<
+  TCompType extends keyof SchemaFormCompMap<SchemaFormValuesType>,
   TProps,
   TValues extends SchemaFormValuesType,
-> = TProps & ExpandFieldType<TCompType, TValues>
+> = TProps &
+  ExpandFormField<TCompType, TValues> & {
+    /**
+     * 只读模式渲染组件
+     * 自定义只读模式的 dom,render 方法只管理的只读模式，编辑模式需要使用 renderFormItem
+     */
+    renderReadOnly?: (props: SchemaFormCompPropsType<TValues>) => React.ReactNode
+  }
 
 // ==================== 字段配置类型 ====================
 
@@ -79,7 +87,7 @@ export type ExpandRendererPropsType<
  * @template TValues - 表单数据类型
  */
 export type SchemaFormColumnConfigType<
-  TCompType extends SchemaFormCompNameType,
+  TCompType extends keyof SchemaFormCompMap<SchemaFormValuesType>,
   TValues extends SchemaFormValuesType,
 > = Omit<AntdMobileFormItemProps, "name" | "children" | "initialValue"> & {
   /** 字段名称，必须是表单数据中的键 */
@@ -87,15 +95,23 @@ export type SchemaFormColumnConfigType<
   /** 字段类型标识符 */
   componentType: TCompType
   /** 字段初始值 */
-  initialValue?: ExtractPropsType<TCompType, TValues>["value"]
+  initialValue?: ExtractCompPropsType<TCompType, TValues>["value"]
   /**
    * 字段属性配置
-   * 排除 ExpandFieldType 组件内部字段
+   * column 配置内排除 ExpandFieldType 组件内部字段
    */
   componentProps?: Omit<
-    ExpandRendererPropsType<TCompType, ExtractPropsType<TCompType, TValues>, TValues>,
-    keyof ExpandFieldType<TCompType, TValues>
+    ExpandCompPropsType<TCompType, ExtractCompPropsType<TCompType, TValues>, TValues>,
+    keyof ExpandFormField<TCompType, TValues>
   >
+
+  /** 是否只读，只读时，组件不进行交互 */
+  readOnly?: boolean
+  /**
+   * 渲染组件
+   * 自定义渲染renderFormItem组件
+   */
+  renderFormItem?: (props: SchemaFormBaseColumnType<TValues>) => React.ReactNode
 }
 
 /**
@@ -103,8 +119,8 @@ export type SchemaFormColumnConfigType<
  * @template TValues - 表单数据类型
  */
 export type SchemaFormBaseColumnType<TValues extends SchemaFormValuesType> = {
-  [K in keyof SchemaFormCompMap<TValues>]: SchemaFormColumnConfigType<K, TValues>
-}[keyof SchemaFormCompMap<TValues>]
+  [K in SchemaFormCompNameType<TValues>]: SchemaFormColumnConfigType<K, TValues>
+}[SchemaFormCompNameType<TValues>]
 
 /**ƒ
  * 依赖 column 配置类型
@@ -163,4 +179,6 @@ export type SchemaFormProps<TValues extends SchemaFormValuesType> = Omit<
   submitButtonProps?: ButtonProps
   /** 表单实例引用 */
   formRef?: React.RefObject<SchemaFormInstance>
+  /** 表单是否只读 */
+  readOnly?: boolean
 }

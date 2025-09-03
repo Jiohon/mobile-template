@@ -1,4 +1,4 @@
-import { useImperativeHandle, useMemo, useState } from "react"
+import React, { useImperativeHandle, useMemo, useState } from "react"
 
 import { Button, Form } from "antd-mobile"
 import classnames from "classnames"
@@ -21,6 +21,7 @@ const BetaSchemaForm = <TValues extends SchemaFormValuesType = SchemaFormValuesT
   submitButtonText = "提交",
   submitButtonProps = {},
   formRef,
+  readOnly = false,
   // 从 props 中提取 antd-mobile Form 的原生属性
   name,
   form: externalForm,
@@ -79,15 +80,36 @@ const BetaSchemaForm = <TValues extends SchemaFormValuesType = SchemaFormValuesT
 
   // 渲染单个表单字段
   const renderFormColumn = (column: SchemaFormBaseColumnType<TValues>, key: string) => {
+    const transformedColumn = {
+      ...column,
+      readOnly: readOnly || column.readOnly,
+      disabled: disabled || column.disabled,
+    }
+
     try {
       // 渲染字段元素
-      const columnElement = schemaRenderer.render(column, form)
+      const columnElement = schemaRenderer.render(transformedColumn, form)
+
       if (!columnElement) {
         return null
       }
 
+      // 自定义 Form.Item 渲染
+      if (transformedColumn?.renderFormItem) {
+        transformedColumn.componentProps = {
+          ...transformedColumn.componentProps,
+          value: form.getFieldValue(transformedColumn.name),
+        }
+
+        return React.createElement(
+          transformedColumn.renderFormItem,
+          transformedColumn,
+          columnElement
+        )
+      }
+
       // 从 column 中提取 Form.Item 属性，排除自定义的属性
-      const { name, ...formItemProps } = column
+      const { name, ...formItemProps } = transformedColumn
 
       return (
         <Form.Item key={key} name={name} {...formItemProps}>
@@ -95,7 +117,7 @@ const BetaSchemaForm = <TValues extends SchemaFormValuesType = SchemaFormValuesT
         </Form.Item>
       )
     } catch (error) {
-      console.error(`❌ 渲染字段 ${String(column.name)} 时出错:`, error)
+      console.error(`❌ 渲染字段 ${String(transformedColumn.name)} 时出错:`, error)
       return null
     }
   }

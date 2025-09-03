@@ -14,7 +14,7 @@ export const createDeployConfig = (env: AppEnvConfig): Omit<UserConfig, "server"
       sourcemap: env.VITE_SOURCEMAP_ENABLE,
       terserOptions: {
         compress: {
-          drop_console: false,
+          drop_console: true,
           drop_debugger: true,
         },
       },

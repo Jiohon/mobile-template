@@ -3,7 +3,7 @@ import React from "react"
 import { Input } from "antd-mobile"
 import classNames from "classnames"
 
-import { ExpandRendererPropsType, SchemaFormValuesType } from "../../types"
+import { ExpandCompPropsType, SchemaFormValuesType } from "../../types"
 
 import type { InputProps } from "antd-mobile"
 import "./index.less"
@@ -11,8 +11,18 @@ import "./index.less"
 /**
  * NumberRenderer组件的Props类型
  */
-export interface NumberRendererProps<T extends SchemaFormValuesType>
-  extends ExpandRendererPropsType<"number", Omit<InputProps, "value" | "onChange">, T> {
+// export interface NumberRendererProps<T extends SchemaFormValuesType>
+//   extends ExpandCompPropsType<"number", Omit<InputProps, "value" | "onChange">, T> {
+//   value?: number
+//   type?: "number"
+//   onChange?: (value: number | string) => void
+// }
+
+export type NumberRendererProps<T extends SchemaFormValuesType> = ExpandCompPropsType<
+  "number",
+  Omit<InputProps, "value" | "onChange">,
+  T
+> & {
   value?: number
   type?: "number"
   onChange?: (value: number | string) => void
@@ -34,6 +44,8 @@ const NumberRenderer = <T extends SchemaFormValuesType>({
 }: NumberRendererProps<T>): React.ReactElement => {
   const placeholder = restProps?.placeholder || `请输入${formItemProps.label}`
 
+  const readOnly = restProps?.readOnly || formItemProps?.readOnly
+
   const handleChange = (value: string) => {
     const numberValue = Number.isNaN(Number(value)) ? "" : Number(value)
     onChange?.(numberValue)
@@ -47,6 +59,7 @@ const NumberRenderer = <T extends SchemaFormValuesType>({
       placeholder={placeholder}
       onChange={handleChange}
       {...restProps}
+      readOnly={readOnly}
     />
   )
 }

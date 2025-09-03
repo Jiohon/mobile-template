@@ -1,7 +1,7 @@
 import { Input, Picker } from "antd-mobile"
 import classNames from "classnames"
 
-import type { ExpandRendererPropsType, SchemaFormValuesType } from "../../types"
+import type { ExpandCompPropsType, SchemaFormValuesType } from "../../types"
 import type { PickerProps } from "antd-mobile"
 import type { PickerValue, PickerValueExtend } from "antd-mobile/es/components/picker"
 
@@ -11,9 +11,9 @@ import "./index.less"
  * DateRenderer组件的Props类型
  */
 export interface PickerRendererProps<T extends SchemaFormValuesType>
-  extends ExpandRendererPropsType<"picker", PickerProps, T> {
-  disabled?: boolean
+  extends ExpandCompPropsType<"picker", PickerProps, T> {
   readOnly?: boolean
+  disabled?: boolean
   placeholder?: string
   onChange?: ((value: PickerValue[], extend: PickerValueExtend) => void) | undefined
 }
@@ -26,7 +26,6 @@ const PickerRenderer = <T extends SchemaFormValuesType>({
   value,
   onConfirm,
   disabled,
-  readOnly,
   className,
   popupClassName,
   formItemProps,
@@ -34,6 +33,8 @@ const PickerRenderer = <T extends SchemaFormValuesType>({
   ...restProps
 }: PickerRendererProps<T>) => {
   const placeholder = restProps?.placeholder || `请选择${formItemProps.label}`
+
+  const readOnly = restProps?.readOnly || formItemProps?.readOnly
 
   const handleConfirm = (value: PickerValue[], extend: PickerValueExtend) => {
     onConfirm?.(value, extend)

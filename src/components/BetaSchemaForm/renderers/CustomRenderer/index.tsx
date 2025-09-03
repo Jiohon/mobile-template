@@ -1,6 +1,6 @@
 import React from "react"
 
-import { ExpandRendererPropsType, SchemaFormValuesType } from "../../types"
+import { ExpandCompPropsType, SchemaFormValuesType } from "../../types"
 
 import "./index.less"
 
@@ -8,8 +8,11 @@ import "./index.less"
  * CustomRenderer组件的Props类型
  */
 export interface CustomRendererProps<T extends SchemaFormValuesType>
-  extends ExpandRendererPropsType<"custom", any, T> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  extends ExpandCompPropsType<"custom", any, T> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   render?: (props: any) => React.ReactNode
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   component?: React.ComponentType<any>
 }
 
@@ -26,6 +29,7 @@ const CustomRenderer = <T extends SchemaFormValuesType>({
   ...otherProps
 }: CustomRendererProps<T>) => {
   // 处理 onChange 事件，确保类型兼容
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleChange = (val: any) => {
     onChange?.(val)
   }
